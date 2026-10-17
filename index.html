@@ -1,0 +1,561 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Senthil Palanivelu · Projects</title>
+<meta name="description" content="Projects built by Senthil Palanivelu: knowledge graphs, LLM tools and interactive apps.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  /* Catppuccin Frappé, hex values from https://catppuccin.com/palette/ */
+  :root {
+    --ctp-red: #e78284;
+    --ctp-peach: #ef9f76;
+    --ctp-yellow: #e5c890;
+    --ctp-green: #a6d189;
+    --ctp-teal: #81c8be;
+    --ctp-mauve: #ca9ee6;
+    --ctp-text: #c6d0f5;
+    --ctp-subtext0: #a5adce;
+    --ctp-overlay1: #838ba7;
+    --ctp-overlay0: #737994;
+    --ctp-surface1: #51576d;
+    --ctp-surface0: #414559;
+    --ctp-base: #303446;
+    --ctp-mantle: #292c3c;
+    --ctp-crust: #232634;
+
+    --bg: var(--ctp-base);
+    --bg-2: var(--ctp-crust);
+    --card: var(--ctp-mantle);
+    --line: var(--ctp-surface0);
+    --line-strong: var(--ctp-surface1);
+    --text: var(--ctp-text);
+    --muted: var(--ctp-subtext0);
+    --faint: var(--ctp-overlay1);
+    --accent: var(--ctp-peach);
+    --accent-2: var(--ctp-teal);
+    --accent-3: var(--ctp-mauve);
+    --shadow: 0 40px 90px -40px var(--ctp-crust);
+    --radius: 22px;
+  }
+  :root[data-theme="light"] {
+    --bg: #f6f3ec;
+    --bg-2: #ece7dc;
+    --card: #ffffff;
+    --line: rgba(20, 22, 30, 0.08);
+    --line-strong: rgba(20, 22, 30, 0.16);
+    --text: #15171d;
+    --muted: #5d6270;
+    --faint: #9a9ea8;
+    --accent: #d9821a;
+    --accent-2: #0e9aa0;
+    --accent-3: #7a4fe0;
+    --shadow: 0 40px 80px -45px rgba(60, 40, 10, 0.4);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Space Grotesk", system-ui, sans-serif;
+    line-height: 1.55;
+    overflow-x: hidden;
+    transition: background 0.3s, color 0.3s;
+  }
+  a { color: inherit; text-decoration: none; }
+  button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+
+  #graph { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; opacity: 0.6; }
+  header, main, footer { position: relative; z-index: 1; }
+  .wrap { max-width: 1200px; margin: 0 auto; padding: 0 clamp(16px, 4vw, 40px); }
+
+  /* ---------- Floating header capsule ---------- */
+  header.dock {
+    position: sticky; top: 0; z-index: 10;
+    padding: 16px clamp(12px, 3vw, 32px) 0;
+    pointer-events: none; /* only the capsule itself takes clicks */
+  }
+  .bar {
+    pointer-events: auto;
+    max-width: 1120px; margin: 0 auto;
+    display: flex; align-items: center; gap: 16px;
+    padding: 6px 6px 6px 6px;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    background: color-mix(in srgb, var(--card) 85%, transparent);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+  }
+
+  .who { display: flex; align-items: center; gap: 10px; flex: none; }
+  .who-mark {
+    width: 34px; height: 34px; display: block;
+    padding: 5px 3px; object-fit: contain;
+    border-radius: 50%;
+    background: #fff; /* matches the logo image's own white background */
+  }
+  .who b { font-weight: 500; font-size: 15px; white-space: nowrap; }
+
+  .top-links { display: flex; align-items: center; flex: none; }
+  .icon-btn {
+    display: grid; place-items: center;
+    width: 34px; height: 34px; border-radius: 50%;
+    color: var(--muted);
+    transition: color 0.2s;
+  }
+  .icon-btn:hover { color: var(--text); }
+
+  .search {
+    flex: 1; min-width: 0;
+    display: flex; align-items: center; gap: 10px;
+    height: 34px; padding: 0 12px;
+    border-radius: 999px;
+    color: var(--faint);
+    transition: background 0.2s, color 0.2s;
+  }
+  .search:hover, .search:focus-within { background: var(--bg-2); }
+  .search:focus-within { color: var(--muted); }
+  .search input {
+    flex: 1; min-width: 0; height: 100%;
+    background: none; border: 0; outline: 0;
+    color: var(--text); font: inherit; font-size: 14.5px;
+  }
+  .search input::placeholder { color: var(--faint); }
+  .search input::-webkit-search-cancel-button { display: none; }
+  .search kbd { font-family: "JetBrains Mono", monospace; font-size: 12px; color: var(--faint); }
+  .search-clear { display: none; color: var(--muted); font-size: 13px; line-height: 1; }
+  .search-clear:hover { color: var(--text); }
+  .search.has-text .search-clear { display: block; }
+  .search.has-text kbd { display: none; }
+
+  .no-results {
+    padding: 60px 24px; text-align: center; color: var(--muted);
+    border: 1px dashed var(--line-strong); border-radius: var(--radius);
+  }
+  .no-results b { display: block; color: var(--text); font-size: 18px; margin-bottom: 6px; }
+
+  /* ---------- Section heading, kept short so the project sits above the fold ---------- */
+  .heading { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin: 36px 0 22px; }
+  .heading h1 { font-size: clamp(28px, 3.6vw, 40px); font-weight: 600; letter-spacing: -0.03em; line-height: 1.1; }
+  .heading h1 em { font-family: "Instrument Serif", serif; font-weight: 400; color: var(--accent); }
+  .heading .count { font-family: "JetBrains Mono", monospace; font-size: 13px; color: var(--faint); }
+
+  /* ---------- Project card ---------- */
+  .projects { display: grid; gap: 28px; padding-bottom: 80px; }
+  .project {
+    position: relative;
+    display: grid; grid-template-columns: 1.15fr 1fr;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    animation: cardIn 0.7s cubic-bezier(.2,.8,.2,1) both;
+    transition: border-color 0.3s;
+  }
+  .project:hover { border-color: var(--line-strong); }
+  @keyframes cardIn { from { opacity: 0; transform: translateY(24px); } }
+
+  /* Left: a live preview of the app inside a browser frame */
+  .preview-side {
+    position: relative; padding: 28px;
+    background:
+      radial-gradient(110% 90% at 0% 0%, color-mix(in srgb, var(--accent-3) 22%, transparent), transparent 60%),
+      radial-gradient(90% 80% at 100% 100%, color-mix(in srgb, var(--accent-2) 18%, transparent), transparent 60%),
+      var(--bg-2);
+    display: flex; flex-direction: column; justify-content: center;
+    border-right: 1px solid var(--line);
+  }
+  .browser {
+    position: relative; display: block;
+    border-radius: 14px; overflow: hidden;
+    border: 1px solid var(--line-strong);
+    background: var(--card);
+    box-shadow: 0 30px 60px -25px var(--ctp-crust);
+    transition: transform 0.5s cubic-bezier(.2,.8,.2,1), box-shadow 0.5s;
+  }
+  .project:hover .browser { transform: translateY(-6px) rotate(-0.4deg); box-shadow: 0 40px 70px -25px var(--ctp-crust); }
+  .browser-bar {
+    display: flex; align-items: center; gap: 7px;
+    height: 34px; padding: 0 12px;
+    border-bottom: 1px solid var(--line);
+    background: var(--bg-2);
+  }
+  .browser-bar i { width: 10px; height: 10px; border-radius: 50%; background: var(--line-strong); }
+  .browser-bar i:nth-child(1) { background: var(--ctp-red); }
+  .browser-bar i:nth-child(2) { background: var(--ctp-yellow); }
+  .browser-bar i:nth-child(3) { background: var(--ctp-green); }
+  .browser-bar .url {
+    flex: 1; margin-left: 10px; height: 22px; border-radius: 6px;
+    background: var(--card); color: var(--muted);
+    font-family: "JetBrains Mono", monospace; font-size: 11px;
+    display: flex; align-items: center; padding: 0 10px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+  }
+  .screen { position: relative; aspect-ratio: 16 / 10; overflow: hidden; background: var(--bg-2); }
+  .screen .fallback { position: absolute; inset: 0; }
+  .screen .fallback svg { width: 100%; height: 100%; display: block; }
+  .screen img {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    object-fit: cover; object-position: top left;
+    display: block;
+  }
+  .screen .open-hint {
+    position: absolute; inset: 0; display: grid; place-items: center;
+    background: color-mix(in srgb, var(--ctp-crust) 70%, transparent); color: var(--ctp-text); font-weight: 500;
+    opacity: 0; transition: opacity 0.3s;
+  }
+  .browser:hover .open-hint { opacity: 1; }
+  .open-hint span { padding: 10px 18px; border-radius: 999px; background: color-mix(in srgb, var(--ctp-surface0) 80%, transparent); border: 1px solid var(--ctp-overlay0); backdrop-filter: blur(6px); }
+
+  .edge { stroke: var(--line-strong); stroke-width: 1; }
+  .edge.hot { stroke: var(--accent); stroke-width: 1.4; stroke-dasharray: 4 5; animation: flow 1.4s linear infinite; }
+  @keyframes flow { to { stroke-dashoffset: -18; } }
+  .node-label { font-family: "JetBrains Mono", monospace; font-size: 11px; fill: var(--muted); }
+
+  .ask {
+    margin-top: 18px;
+    display: flex; align-items: center; gap: 10px;
+    padding: 12px 16px; border-radius: 12px;
+    background: var(--card); border: 1px solid var(--line-strong);
+    font-family: "JetBrains Mono", monospace; font-size: 13px;
+    min-height: 46px;
+  }
+  .ask .prompt { color: var(--accent); }
+  .ask .cursor { width: 7px; height: 16px; background: var(--accent); animation: blink 1s steps(1) infinite; flex: none; }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  /* Right: what it is, how it works, what it's built with */
+  .info { position: relative; padding: clamp(24px, 3.4vw, 40px); display: flex; flex-direction: column; }
+  .meta { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .badge {
+    display: inline-flex; align-items: center; gap: 7px;
+    font-family: "JetBrains Mono", monospace; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase;
+    padding: 5px 10px; border-radius: 999px; border: 1px solid var(--line-strong); color: var(--muted);
+  }
+  .badge i { width: 6px; height: 6px; border-radius: 50%; background: var(--ctp-green); box-shadow: 0 0 8px var(--ctp-green); }
+  .info h2 { margin-top: 16px; font-size: clamp(34px, 4.4vw, 52px); font-weight: 600; letter-spacing: -0.035em; line-height: 1; }
+  .tagline { font-family: "Instrument Serif", serif; font-style: italic; font-size: clamp(20px, 2.2vw, 25px); color: var(--accent); margin-top: 6px; }
+  .summary { margin-top: 16px; color: var(--muted); font-size: 15.5px; }
+
+  .label {
+    margin: 26px 0 12px;
+    font-family: "JetBrains Mono", monospace; font-size: 11.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--faint);
+  }
+  .skills { display: flex; flex-wrap: wrap; gap: 6px; }
+  .skill {
+    font-family: "JetBrains Mono", monospace; font-size: 11.5px;
+    padding: 4px 10px; border-radius: 7px; background: var(--line);
+  }
+
+  .actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: auto; padding-top: 28px; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 9px;
+    padding: 12px 20px; border-radius: 999px; font-weight: 500; font-size: 14.5px;
+    transition: transform 0.25s cubic-bezier(.2,.8,.2,1), box-shadow 0.25s, border-color 0.25s;
+  }
+  .btn svg { width: 16px; height: 16px; }
+  .btn-primary { background: var(--text); color: var(--bg); }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 30px -10px var(--accent); }
+  .btn-ghost { border: 1px solid var(--line-strong); }
+  .btn-ghost:hover { transform: translateY(-2px); border-color: var(--accent); }
+
+  /* ---------- "More coming" strip ---------- */
+  .soon {
+    display: flex; align-items: center; gap: 18px;
+    padding: 22px 26px; border-radius: var(--radius);
+    border: 1px dashed var(--line-strong); color: var(--muted);
+  }
+  .soon .orbit { position: relative; width: 44px; height: 44px; flex: none; border-radius: 50%; border: 1px dashed var(--line-strong); }
+  .soon .orbit::after {
+    content: ""; position: absolute; top: -4px; left: calc(50% - 4px); width: 8px; height: 8px; border-radius: 50%;
+    background: var(--accent); box-shadow: 0 0 10px var(--accent);
+    transform-origin: 4px 26px; animation: orbit 4s linear infinite;
+  }
+  @keyframes orbit { to { transform: rotate(360deg); } }
+  .soon b { color: var(--text); font-weight: 600; }
+
+  footer { border-top: 1px solid var(--line); padding: 30px 0 50px; color: var(--muted); font-size: 14px; }
+  footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+  footer a:hover { color: var(--text); }
+
+  @media (max-width: 900px) {
+    .project { grid-template-columns: 1fr; }
+    .preview-side { border-right: 0; border-bottom: 1px solid var(--line); padding: 18px; }
+  }
+  @media (max-width: 640px) {
+    header.dock { padding-top: 10px; }
+    .bar { flex-wrap: wrap; justify-content: space-between; border-radius: 22px; gap: 6px; padding: 6px 6px 6px 8px; }
+    .search kbd { display: none; }
+    .search { order: 3; flex-basis: 100%; background: var(--bg-2); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+  }
+</style>
+</head>
+<body>
+<canvas id="graph" aria-hidden="true"></canvas>
+
+<header class="dock" id="dock">
+  <div class="bar">
+    <div class="who">
+      <img class="who-mark" src="images/sp.png" alt="SP logo">
+      <b>My Projects</b>
+    </div>
+    <label class="search" id="searchBox">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input id="search" type="search" placeholder="Search projects, e.g. Neo4j" autocomplete="off" aria-label="Search projects">
+      <kbd>/</kbd>
+      <button type="button" class="search-clear" id="searchClear" aria-label="Clear search">✕</button>
+    </label>
+    <nav class="top-links">
+      <button class="icon-btn" id="themeBtn" aria-label="Toggle light and dark theme">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+      </button>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="heading">
+    <h1>Things I've <em>built</em></h1>
+    <span class="count" id="count"></span>
+  </div>
+  <div class="projects" id="projects"></div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>© <span id="year"></span> Senthil Palanivelu</span>
+    <a href="https://github.com/spalanivelu1989" target="_blank" rel="noopener">github.com/spalanivelu1989</a>
+  </div>
+</footer>
+
+<script>
+/* =====================================================================
+   PROJECTS
+   To add a project, copy an object below and change the values.
+   Required: id, name, summary, skills, links.
+   Optional: tagline, status, image, sampleQuestion, graphLabels.
+   image is a screenshot of the app (16:10 works best); without one,
+   a small graph drawing is shown instead.
+   Projects show in the order they appear here.
+   ===================================================================== */
+const PROJECTS = [
+  {
+    id: "trace-iq",
+    name: "TraceIQ",
+    tagline: "Ask your project why.",
+    status: "Live",
+    image: "images/trace-iq.png",
+    summary:
+      "Built TraceIQ to answer the \"why\" behind a project. It models projects, components, architectural decisions, their reasons, bugs, fixes and dependencies as a Neo4j knowledge graph. Developers ask questions in plain English, and an LLM turns each question into a Cypher query. The app runs that query against Neo4j and writes an answer from the records that come back.",
+    sampleQuestion: "Why did we move auth to a separate service?",
+    graphLabels: ["Project", "Component", "Decision", "Reason", "Bug", "Fix", "Dependency"],
+    skills: ["Neo4j", "Cypher", "Knowledge Graphs", "LLMs / Text-to-Cypher", "React", "TypeScript", "Node.js", "Data Visualization", "UX Design", "CI/CD"],
+    links: {
+      live: "https://spalanivelu1989.github.io/trace-iq/",
+      repo: "https://github.com/spalanivelu1989/trace-iq"
+    }
+  }
+];
+
+/* ===================================================================== */
+
+const $ = (s, el = document) => el.querySelector(s);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+/* ---------- Theme ---------- */
+(function initTheme() {
+  let saved = null;
+  try { saved = localStorage.getItem("theme"); } catch (e) {}
+  document.documentElement.dataset.theme = saved || "dark";
+  $("#themeBtn").addEventListener("click", () => {
+    const next = document.documentElement.dataset.theme === "light" ? "dark" : "light";
+    document.documentElement.dataset.theme = next;
+    try { localStorage.setItem("theme", next); } catch (e) {}
+  });
+})();
+
+/* ---------- Fallback picture shown until the live preview loads ---------- */
+function seeded(str) {
+  let h = 2166136261;
+  for (const c of str) h = Math.imul(h ^ c.charCodeAt(0), 16777619);
+  return () => ((h = Math.imul(h ^ (h >>> 15), 2246822507), h = Math.imul(h ^ (h >>> 13), 3266489909), (h ^= h >>> 16) >>> 0) / 4294967296);
+}
+function miniGraph(p) {
+  const rnd = seeded(p.id);
+  const labels = p.graphLabels || p.skills.slice(0, 6);
+  const colors = ["var(--accent)", "var(--accent-2)", "var(--accent-3)"];
+  const W = 640, H = 400, cx = W / 2, cy = H / 2;
+  const nodes = labels.map((label, i) => {
+    const a = (i / labels.length) * Math.PI * 2 + rnd() * 0.4;
+    return { label, x: cx + Math.cos(a) * (190 + rnd() * 40), y: cy + Math.sin(a) * (120 + rnd() * 30), r: 6 + rnd() * 5, c: colors[i % 3] };
+  });
+  let svg = `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid slice">`;
+  nodes.forEach((n, i) => {
+    svg += `<line class="edge ${i % 2 ? "" : "hot"}" x1="${cx}" y1="${cy}" x2="${n.x}" y2="${n.y}"/>`;
+    const m = nodes[(i + 2) % nodes.length];
+    svg += `<line class="edge" x1="${n.x}" y1="${n.y}" x2="${m.x}" y2="${m.y}" opacity="0.5"/>`;
+  });
+  svg += `<circle cx="${cx}" cy="${cy}" r="18" fill="var(--accent)" opacity="0.15"><animate attributeName="r" values="16;26;16" dur="3s" repeatCount="indefinite"/></circle>`;
+  svg += `<circle cx="${cx}" cy="${cy}" r="11" fill="var(--accent)"/>`;
+  nodes.forEach(n => {
+    svg += `<circle cx="${n.x}" cy="${n.y}" r="${n.r}" fill="${n.c}"/>`;
+    svg += `<text class="node-label" x="${n.x + n.r + 6}" y="${n.y + 4}">${esc(n.label)}</text>`;
+  });
+  return svg + "</svg>";
+}
+
+/* ---------- Render ---------- */
+function projectHTML(p, i) {
+  const host = p.links.live ? p.links.live.replace(/^https?:\/\//, "").replace(/\/$/, "") : "";
+  const preview = p.links.live
+    ? `<a class="browser" href="${esc(p.links.live)}" target="_blank" rel="noopener" aria-label="Open ${esc(p.name)} live app">
+         <div class="browser-bar"><i></i><i></i><i></i><span class="url">${esc(host)}</span></div>
+         <div class="screen">
+           <div class="fallback">${miniGraph(p)}</div>
+           ${p.image ? `<img src="${esc(p.image)}" alt="Screenshot of ${esc(p.name)}" loading="lazy" onerror="this.remove()">` : ""}
+           <div class="open-hint"><span>Open live app ↗</span></div>
+         </div>
+       </a>`
+    : `<div class="browser"><div class="screen"><div class="fallback">${miniGraph(p)}</div></div></div>`;
+
+  return `
+  <article class="project" style="animation-delay:${i * 100}ms">
+    <div class="preview-side">
+      ${preview}
+      ${p.sampleQuestion ? `<div class="ask"><span class="prompt">›</span><span class="typed" data-text="${esc(p.sampleQuestion)}"></span><span class="cursor"></span></div>` : ""}
+    </div>
+    <div class="info">
+      <div class="meta">
+        ${p.status ? `<span class="badge"><i></i>${esc(p.status)}</span>` : ""}
+        <span class="badge">Project ${String(i + 1).padStart(2, "0")}</span>
+      </div>
+      <h2>${esc(p.name)}</h2>
+      ${p.tagline ? `<div class="tagline">${esc(p.tagline)}</div>` : ""}
+      <p class="summary">${esc(p.summary)}</p>
+      <div class="label">Built with</div>
+      <div class="skills">${p.skills.map(s => `<span class="skill">${esc(s)}</span>`).join("")}</div>
+      <div class="actions">
+        ${p.links.live ? `<a class="btn btn-primary" href="${esc(p.links.live)}" target="_blank" rel="noopener">See it live ↗</a>` : ""}
+        ${p.links.repo ? `<a class="btn btn-ghost" href="${esc(p.links.repo)}" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m16 18 6-6-6-6M8 6l-6 6 6 6"/></svg>Source code</a>` : ""}
+      </div>
+    </div>
+  </article>`;
+}
+
+let query = "";
+
+/* A project matches when every word typed appears in its name, tagline, summary or skills */
+function matches(p) {
+  const hay = [p.name, p.tagline, p.summary, ...p.skills].join(" ").toLowerCase();
+  return query.split(/\s+/).filter(Boolean).every(w => hay.includes(w));
+}
+
+function render() {
+  const list = PROJECTS.filter(matches);
+  const plural = n => `${n} project${n === 1 ? "" : "s"}`;
+  $("#count").textContent = query ? `${list.length} of ${plural(PROJECTS.length)}` : plural(PROJECTS.length);
+
+  $("#projects").innerHTML = list.length
+    ? list.map(p => projectHTML(p, PROJECTS.indexOf(p))).join("") + (query ? "" : `
+      <div class="soon"><span class="orbit"></span><div><b>More projects on the way.</b> New work lands here as it ships.</div></div>`)
+    : `<div class="no-results"><b>No projects match "${esc(query)}"</b>Try a project name or a skill such as Neo4j, React or LLMs.</div>`;
+
+  document.querySelectorAll(".typed").forEach(typeLoop);
+}
+
+/* ---------- Search ---------- */
+const searchInput = $("#search");
+function setQuery(value) {
+  query = value.trim().toLowerCase();
+  $("#searchBox").classList.toggle("has-text", value.length > 0);
+  render();
+}
+searchInput.addEventListener("input", e => setQuery(e.target.value));
+$("#searchClear").addEventListener("click", () => { searchInput.value = ""; setQuery(""); searchInput.focus(); });
+document.addEventListener("keydown", e => {
+  if (e.key === "/" && document.activeElement !== searchInput) { e.preventDefault(); searchInput.focus(); }
+  if (e.key === "Escape" && document.activeElement === searchInput) { searchInput.value = ""; setQuery(""); searchInput.blur(); }
+});
+
+/* Types the sample question, pauses, erases, repeats */
+function typeLoop(el) {
+  const text = el.dataset.text;
+  let i = 0, dir = 1;
+  const step = () => {
+    if (!el.isConnected) return; // card was re-rendered by a search
+    i += dir;
+    el.textContent = text.slice(0, i);
+    let wait = dir > 0 ? 45 + Math.random() * 50 : 18;
+    if (i === text.length) { dir = -1; wait = 2600; }
+    if (i === 0) { dir = 1; wait = 600; }
+    setTimeout(step, wait);
+  };
+  step();
+}
+
+/* ---------- Subtle moving graph in the background ---------- */
+(function backgroundGraph() {
+  const canvas = $("#graph");
+  const ctx = canvas.getContext("2d");
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let W, H, dpr, nodes = [];
+  const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+
+  function resize() {
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    W = canvas.width = innerWidth * dpr;
+    H = canvas.height = innerHeight * dpr;
+    const count = Math.round(Math.min(70, (innerWidth * innerHeight) / 20000));
+    nodes = Array.from({ length: count }, () => ({
+      x: Math.random() * W, y: Math.random() * H,
+      vx: (Math.random() - 0.5) * 0.2 * dpr, vy: (Math.random() - 0.5) * 0.2 * dpr,
+      r: (Math.random() * 1.4 + 0.7) * dpr, k: Math.floor(Math.random() * 3)
+    }));
+  }
+  addEventListener("resize", resize);
+  resize();
+
+  function frame() {
+    const palette = [css("--accent"), css("--accent-2"), css("--accent-3")];
+    const link = 130 * dpr;
+    ctx.clearRect(0, 0, W, H);
+    ctx.strokeStyle = css("--text");
+    ctx.lineWidth = 0.8 * dpr;
+    for (const n of nodes) {
+      n.x += n.vx; n.y += n.vy;
+      if (n.x < 0 || n.x > W) n.vx *= -1;
+      if (n.y < 0 || n.y > H) n.vy *= -1;
+    }
+    for (let i = 0; i < nodes.length; i++) {
+      for (let j = i + 1; j < nodes.length; j++) {
+        const a = nodes[i], b = nodes[j], d = Math.hypot(a.x - b.x, a.y - b.y);
+        if (d < link) {
+          ctx.globalAlpha = (1 - d / link) * 0.1;
+          ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+        }
+      }
+    }
+    for (const n of nodes) {
+      ctx.globalAlpha = 0.45;
+      ctx.fillStyle = palette[n.k];
+      ctx.beginPath(); ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+    if (!reduce) requestAnimationFrame(frame);
+  }
+  frame();
+})();
+
+$("#year").textContent = new Date().getFullYear();
+render();
+</script>
+</body>
+</html>

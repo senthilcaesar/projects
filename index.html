@@ -4,6 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Senthil Palanivelu · Projects</title>
+<!-- Tab icon: a project folder in the page's peach accent -->
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M3 8a3 3 0 0 1 3-3h6.2a3 3 0 0 1 2.1.9L16.4 8H26a3 3 0 0 1 3 3v13a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3z' fill='%23d9821a'/%3E%3Cpath d='M3 13a2.5 2.5 0 0 1 2.5-2.5h21A2.5 2.5 0 0 1 29 13v11a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3z' fill='%23ef9f76'/%3E%3C/svg%3E">
 <meta name="description" content="Projects built by Senthil Palanivelu: knowledge graphs, LLM tools and interactive apps.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -57,12 +59,15 @@
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
+  /* The page fills exactly one screen; projects flip in place instead of scrolling */
   body {
     background: var(--bg);
     color: var(--text);
     font-family: "Space Grotesk", system-ui, sans-serif;
     line-height: 1.55;
-    overflow-x: hidden;
+    height: 100vh; height: 100dvh;
+    display: flex; flex-direction: column;
+    overflow: hidden;
     transition: background 0.3s, color 0.3s;
   }
   a { color: inherit; text-decoration: none; }
@@ -70,17 +75,24 @@
 
   #graph { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; opacity: 0.6; }
   header, main, footer { position: relative; z-index: 1; }
-  .wrap { max-width: 1200px; margin: 0 auto; padding: 0 clamp(16px, 4vw, 40px); }
+  /* Content is up to 1480px wide. --gutter keeps 84px clear on each side of the
+     card for the edge arrows, taking only what the space outside .wrap can't give. */
+  :root {
+    --pad: clamp(16px, 4vw, 40px);
+    --gutter: max(0px, calc(84px - var(--pad) - max(0px, (100vw - 1560px) / 2)));
+  }
+  .wrap { width: 100%; max-width: 1560px; margin: 0 auto; padding: 0 calc(var(--pad) + var(--gutter)); }
+  main.wrap { flex: 1; min-height: 0; display: flex; flex-direction: column; }
 
   /* ---------- Floating header capsule ---------- */
   header.dock {
-    position: sticky; top: 0; z-index: 10;
-    padding: 16px clamp(12px, 3vw, 32px) 0;
+    position: relative; z-index: 10; flex: none;
+    padding: 16px calc(var(--pad) + var(--gutter)) 0;
     pointer-events: none; /* only the capsule itself takes clicks */
   }
   .bar {
     pointer-events: auto;
-    max-width: 1120px; margin: 0 auto;
+    max-width: 1480px; margin: 0 auto;
     display: flex; align-items: center; gap: 16px;
     padding: 6px 6px 6px 6px;
     border-radius: 999px;
@@ -97,7 +109,8 @@
     border-radius: 50%;
     background: #fff; /* matches the logo image's own white background */
   }
-  .who b { font-weight: 500; font-size: 15px; white-space: nowrap; }
+  .who h1 { font-size: 18px; font-weight: 600; letter-spacing: -0.02em; line-height: 1; white-space: nowrap; }
+  .who h1 em { font-family: "Instrument Serif", serif; font-size: 1.2em; font-weight: 400; color: var(--accent); }
 
   .top-links { display: flex; align-items: center; flex: none; }
   .icon-btn {
@@ -132,32 +145,117 @@
   .search.has-text kbd { display: none; }
 
   .no-results {
+    position: absolute; inset: 0; display: grid; place-content: center;
     padding: 60px 24px; text-align: center; color: var(--muted);
     border: 1px dashed var(--line-strong); border-radius: var(--radius);
   }
   .no-results b { display: block; color: var(--text); font-size: 18px; margin-bottom: 6px; }
 
-  /* ---------- Section heading, kept short so the project sits above the fold ---------- */
-  .heading { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin: 36px 0 22px; }
-  .heading h1 { font-size: clamp(28px, 3.6vw, 40px); font-weight: 600; letter-spacing: -0.03em; line-height: 1.1; }
-  .heading h1 em { font-family: "Instrument Serif", serif; font-weight: 400; color: var(--accent); }
-  .heading .count { font-family: "JetBrains Mono", monospace; font-size: 13px; color: var(--faint); }
+  /* ---------- Project count, in the header beside the pager ---------- */
+  .count { flex: none; font-family: "JetBrains Mono", monospace; font-size: 13px; color: var(--faint); white-space: nowrap; }
 
-  /* ---------- Project card ---------- */
-  .projects { display: grid; gap: 28px; padding-bottom: 80px; }
+  /* ---------- Pager: previous / next, page number and dots ---------- */
+  .pager { flex: none; display: flex; align-items: center; gap: 10px; }
+  .pager[hidden] { display: none; }
+  .nav-btn {
+    display: grid; place-items: center;
+    width: 32px; height: 32px; border-radius: 50%;
+    border: 1px solid var(--line-strong); color: var(--muted);
+    transition: color 0.2s, border-color 0.2s, transform 0.25s cubic-bezier(.2,.8,.2,1), opacity 0.2s;
+  }
+  .nav-btn:hover:not(:disabled) { color: var(--text); border-color: var(--accent); transform: scale(1.06); }
+  .nav-btn:disabled { opacity: 0.3; cursor: default; }
+  .page-no { font-family: "JetBrains Mono", monospace; font-size: 13px; color: var(--muted); min-width: 56px; text-align: center; }
+  .page-no b { color: var(--text); font-weight: 500; }
+  .dots { display: flex; gap: 6px; }
+  .dot { width: 8px; height: 8px; border-radius: 999px; background: var(--line-strong); transition: width 0.5s cubic-bezier(.2,.8,.2,1), background 0.5s; }
+  .dot.on { width: 22px; background: var(--accent); }
+
+  /* ---------- Deck: one project per page, turned over like a sheet of paper ---------- */
+  .deck {
+    position: relative; flex: 1; min-height: 0; margin-bottom: 16px;
+    perspective: 2600px;
+    animation: cardIn 0.7s cubic-bezier(.2,.8,.2,1) both;
+  }
+  @keyframes cardIn { from { opacity: 0; transform: translateY(24px); } }
+
+  /* Edges of the sheets underneath peek out while more pages follow */
+  .deck::before, .deck::after {
+    content: ""; position: absolute; inset: 0; z-index: 0;
+    border-radius: var(--radius); border: 1px solid var(--line-strong);
+    background: var(--card);
+    opacity: 0; transition: opacity 0.5s;
+  }
+  .deck::before { transform: translate(7px, 7px); }
+  .deck::after { transform: translate(14px, 14px); }
+  .deck.has-more::before { opacity: 0.75; }
+  .deck.has-more.has-many::after { opacity: 0.4; }
+
+  /* ---------- Big previous / next arrows on the card's edges ---------- */
+  /* The arrows sit just outside the card, clear of the peeking sheets (14px) plus a 10px gap */
+  .stage { position: relative; flex: 1; min-height: 0; display: flex; flex-direction: column; margin: 20px 0 16px; }
+  .stage .deck { margin-bottom: 0; }
+  .edge-btn {
+    position: absolute; top: 50%; z-index: 6;
+    display: grid; place-items: center;
+    width: 52px; height: 52px; margin-top: -26px; border-radius: 50%;
+    background: var(--card); color: var(--accent);
+    border: 1px solid var(--line-strong);
+    box-shadow: 0 14px 30px -12px var(--ctp-crust);
+    transition: transform 0.3s cubic-bezier(.2,.8,.2,1), border-color 0.3s, opacity 0.3s, visibility 0.3s;
+  }
+  .edge-btn svg { width: 22px; height: 22px; }
+  .edge-btn.prev { left: -76px; }
+  .edge-btn.next { right: -76px; }
+  .edge-btn:hover { border-color: var(--accent); transform: scale(1.08); }
+  .edge-btn.prev:hover { transform: scale(1.08) translateX(-2px); }
+  .edge-btn.next:hover { transform: scale(1.08) translateX(2px); }
+  .edge-btn:disabled { opacity: 0; visibility: hidden; }
+  .edge-btn .peek {
+    position: absolute; top: 50%; right: calc(100% + 10px); transform: translate(6px, -50%);
+    white-space: nowrap; pointer-events: none;
+    padding: 7px 14px; border-radius: 999px;
+    background: var(--text); color: var(--bg); font-size: 13.5px; font-weight: 500;
+    opacity: 0; transition: opacity 0.25s, transform 0.25s cubic-bezier(.2,.8,.2,1);
+  }
+  .edge-btn.prev .peek { right: auto; left: calc(100% + 10px); transform: translate(-6px, -50%); }
+  .edge-btn:hover .peek, .edge-btn:focus-visible .peek { opacity: 1; transform: translate(0, -50%); }
+  .edge-btn.nudge { animation: ring 1.2s ease-out 2; }
+  @keyframes ring {
+    0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 60%, transparent), 0 14px 30px -12px var(--ctp-crust); }
+    100% { box-shadow: 0 0 0 16px transparent, 0 14px 30px -12px var(--ctp-crust); }
+  }
+
+  /* ---------- Project card (one page of the deck) ---------- */
   .project {
-    position: relative;
+    position: absolute; inset: 0;
     display: grid; grid-template-columns: 1.15fr 1fr;
     background: var(--card);
     border: 1px solid var(--line);
     border-radius: var(--radius);
     box-shadow: var(--shadow);
     overflow: hidden;
-    animation: cardIn 0.7s cubic-bezier(.2,.8,.2,1) both;
+    visibility: hidden;
+    transform-origin: left center; /* pages hinge on their left edge */
+    backface-visibility: hidden;
     transition: border-color 0.3s;
   }
   .project:hover { border-color: var(--line-strong); }
-  @keyframes cardIn { from { opacity: 0; transform: translateY(24px); } }
+  .project.is-current { visibility: visible; z-index: 2; }
+  .project.is-turning { visibility: visible; z-index: 3; will-change: transform; }
+  .project.is-under { visibility: visible; z-index: 1; will-change: transform; }
+
+  /* The page beneath a turn sits in shadow until it's uncovered */
+  .shade { position: absolute; inset: 0; z-index: 5; pointer-events: none; opacity: 0; }
+  .is-under .shade { background: color-mix(in srgb, var(--ctp-crust) 55%, transparent); }
+
+  /* Page turn: a few hinged panels that stand in for the page while it turns (built in JS).
+     Each panel shows its slice of a still copy of the page. */
+  .turn { position: absolute; inset: 0; z-index: 3; pointer-events: none; perspective: 2600px; }
+  .panel { position: absolute; left: 0; top: 0; height: 100%; overflow: hidden; transform-origin: 0 0; backface-visibility: hidden; }
+  .panel > .project { visibility: visible; backface-visibility: visible; transition: none; }
+  .panel * { animation: none !important; }
+  .panel .lit { position: absolute; inset: 0; z-index: 6; background: var(--ctp-crust); opacity: 0; }
 
   /* Left: a live preview of the app inside a browser frame */
   .preview-side {
@@ -175,9 +273,20 @@
     border: 1px solid var(--line-strong);
     background: var(--card);
     box-shadow: 0 30px 60px -25px var(--ctp-crust);
-    transition: transform 0.5s cubic-bezier(.2,.8,.2,1), box-shadow 0.5s;
+    transition: transform 0.45s cubic-bezier(.2,.8,.2,1), box-shadow 0.45s, border-color 0.45s;
   }
-  .project:hover .browser { transform: translateY(-6px) rotate(-0.4deg); box-shadow: 0 40px 70px -25px var(--ctp-crust); }
+  /* Hovering the app image lifts it gently towards the viewer: a little larger,
+     on a slightly deeper shadow, with a faint accent edge */
+  @media (hover: hover) {
+    .browser:hover {
+      z-index: 2;
+      transform: translateY(-4px) scale(1.02);
+      border-color: color-mix(in srgb, var(--accent) 25%, var(--line-strong));
+      box-shadow:
+        0 40px 70px -28px var(--ctp-crust),
+        0 0 24px -10px color-mix(in srgb, var(--accent) 30%, transparent);
+    }
+  }
   .browser-bar {
     display: flex; align-items: center; gap: 7px;
     height: 34px; padding: 0 12px;
@@ -203,13 +312,6 @@
     object-fit: cover; object-position: top left;
     display: block;
   }
-  .screen .open-hint {
-    position: absolute; inset: 0; display: grid; place-items: center;
-    background: color-mix(in srgb, var(--ctp-crust) 70%, transparent); color: var(--ctp-text); font-weight: 500;
-    opacity: 0; transition: opacity 0.3s;
-  }
-  .browser:hover .open-hint { opacity: 1; }
-  .open-hint span { padding: 10px 18px; border-radius: 999px; background: color-mix(in srgb, var(--ctp-surface0) 80%, transparent); border: 1px solid var(--ctp-overlay0); backdrop-filter: blur(6px); }
 
   .edge { stroke: var(--line-strong); stroke-width: 1; }
   .edge.hot { stroke: var(--accent); stroke-width: 1.4; stroke-dasharray: 4 5; animation: flow 1.4s linear infinite; }
@@ -229,7 +331,7 @@
   @keyframes blink { 50% { opacity: 0; } }
 
   /* Right: what it is, how it works, what it's built with */
-  .info { position: relative; padding: clamp(24px, 3.4vw, 40px); display: flex; flex-direction: column; }
+  .info { position: relative; padding: clamp(24px, 3.4vw, 40px); display: flex; flex-direction: column; min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
   .meta { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
   .badge {
     display: inline-flex; align-items: center; gap: 7px;
@@ -251,7 +353,7 @@
     padding: 4px 10px; border-radius: 7px; background: var(--line);
   }
 
-  .actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: auto; padding-top: 28px; }
+  .actions { display: flex; justify-content: flex-end; gap: 10px; flex-wrap: wrap; margin-top: auto; padding-top: 28px; } /* bottom-right of the card */
   .btn {
     display: inline-flex; align-items: center; gap: 9px;
     padding: 12px 20px; border-radius: 999px; font-weight: 500; font-size: 14.5px;
@@ -263,33 +365,25 @@
   .btn-ghost { border: 1px solid var(--line-strong); }
   .btn-ghost:hover { transform: translateY(-2px); border-color: var(--accent); }
 
-  /* ---------- "More coming" strip ---------- */
-  .soon {
-    display: flex; align-items: center; gap: 18px;
-    padding: 22px 26px; border-radius: var(--radius);
-    border: 1px dashed var(--line-strong); color: var(--muted);
-  }
-  .soon .orbit { position: relative; width: 44px; height: 44px; flex: none; border-radius: 50%; border: 1px dashed var(--line-strong); }
-  .soon .orbit::after {
-    content: ""; position: absolute; top: -4px; left: calc(50% - 4px); width: 8px; height: 8px; border-radius: 50%;
-    background: var(--accent); box-shadow: 0 0 10px var(--accent);
-    transform-origin: 4px 26px; animation: orbit 4s linear infinite;
-  }
-  @keyframes orbit { to { transform: rotate(360deg); } }
-  .soon b { color: var(--text); font-weight: 600; }
+  footer { flex: none; border-top: 1px solid var(--line); padding: 14px 0 18px; color: var(--muted); font-size: 13.5px; }
+  footer .wrap { display: flex; justify-content: space-between; gap: 8px 16px; flex-wrap: wrap; }
 
-  footer { border-top: 1px solid var(--line); padding: 30px 0 50px; color: var(--muted); font-size: 14px; }
-  footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
-
+  /* Narrow screens: one column, and the page itself scrolls if it's taller than the deck */
   @media (max-width: 900px) {
-    .project { grid-template-columns: 1fr; }
+    .project { grid-template-columns: 1fr; grid-template-rows: auto auto; align-content: start; overflow-y: auto; overscroll-behavior: contain; }
+    .info { overflow: visible; }
     .preview-side { border-right: 0; border-bottom: 1px solid var(--line); padding: 18px; }
   }
   @media (max-width: 640px) {
     header.dock { padding-top: 10px; }
+    .stage { margin-top: 12px; }
+    .count, .dots { display: none; }
+    .edge-btn { display: none; } /* no room beside the card; the pager and swipe cover it */
+    :root { --gutter: 0px; }
     .bar { flex-wrap: wrap; justify-content: space-between; border-radius: 22px; gap: 6px; padding: 6px 6px 6px 8px; }
     .search kbd { display: none; }
-    .search { order: 3; flex-basis: 100%; background: var(--bg-2); }
+    .search { order: 3; flex: 1 1 calc(100% - 150px); background: var(--bg-2); } /* second line: search beside the pager */
+    .pager { order: 4; gap: 6px; }
   }
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { animation: none !important; transition: none !important; }
@@ -303,7 +397,7 @@
   <div class="bar">
     <div class="who">
       <img class="who-mark" src="images/sp.png" alt="SP logo">
-      <b>My Projects</b>
+      <h1>Things I've <em>built</em></h1>
     </div>
     <label class="search" id="searchBox">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
@@ -311,6 +405,17 @@
       <kbd>/</kbd>
       <button type="button" class="search-clear" id="searchClear" aria-label="Clear search">✕</button>
     </label>
+    <span class="count" id="count"></span>
+    <nav class="pager" id="pager" aria-label="Projects">
+      <button class="nav-btn" id="prevBtn" aria-label="Previous project">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+      </button>
+      <span class="page-no" id="pageNo" aria-live="polite"></span>
+      <button class="nav-btn" id="nextBtn" aria-label="Next project">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+      </button>
+      <div class="dots" id="dots"></div>
+    </nav>
     <nav class="top-links">
       <button class="icon-btn" id="themeBtn" aria-label="Toggle light and dark theme">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
@@ -320,11 +425,17 @@
 </header>
 
 <main class="wrap">
-  <div class="heading">
-    <h1>Things I've <em>built</em></h1>
-    <span class="count" id="count"></span>
+  <div class="stage">
+    <div class="deck" id="deck"></div>
+    <button class="edge-btn prev" id="edgePrev" aria-label="Previous project">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+      <span class="peek" id="peekPrev"></span>
+    </button>
+    <button class="edge-btn next" id="edgeNext" aria-label="Next project">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+      <span class="peek" id="peekNext"></span>
+    </button>
   </div>
-  <div class="projects" id="projects"></div>
 </main>
 
 <footer>
@@ -339,7 +450,7 @@
    To add a project, copy an object below and change the values.
    Required: id, name, summary, skills, links.
    Optional: tagline, status, image, sampleQuestion, graphLabels.
-   image is a screenshot of the app (16:10 works best); without one,
+   image is a screenshot of the app; the preview frame takes its shape. Without one,
    a small graph drawing is shown instead.
    Projects show in the order they appear here.
    ===================================================================== */
@@ -358,6 +469,20 @@ const PROJECTS = [
     links: {
       live: "https://spalanivelu1989.github.io/trace-iq/",
       repo: "https://github.com/spalanivelu1989/trace-iq"
+    }
+  },
+  {
+    id: "amudham-naturals",
+    name: "Amudham Naturals",
+    tagline: "Your trusted source for premium organic and natural food products.",
+    status: "Live",
+    image: "images/amudham-naturals.png",
+    summary:
+      "Built the online store for Amudham Naturals, a brand of premium organic and natural foods. Shoppers browse and search the range, add products to a cart and pay at checkout through Razorpay. Messages are sent with EmailJS, and the Next.js site is hosted on Netlify.",
+    graphLabels: ["Products", "Search", "Cart", "Checkout", "Razorpay", "EmailJS"],
+    skills: ["TypeScript", "Next.js 15+", "React 19", "Tailwind CSS 4.0", "HTML", "CSS", "Netlify", "Razorpay", "EmailJS"],
+    links: {
+      live: "https://amudhamnaturals.com/"
     }
   }
 ];
@@ -417,14 +542,14 @@ function projectHTML(p, i) {
          <div class="browser-bar"><i></i><i></i><i></i><span class="url">${esc(host)}</span></div>
          <div class="screen">
            <div class="fallback">${miniGraph(p)}</div>
-           ${p.image ? `<img src="${esc(p.image)}" alt="Screenshot of ${esc(p.name)}" loading="lazy" onerror="this.remove()">` : ""}
-           <div class="open-hint"><span>Open live app ↗</span></div>
+           ${p.image ? `<img src="${esc(p.image)}" alt="Screenshot of ${esc(p.name)}" loading="lazy" onerror="this.remove()" onload="this.parentNode.style.aspectRatio = this.naturalWidth + ' / ' + this.naturalHeight">` : ""}
          </div>
        </a>`
     : `<div class="browser"><div class="screen"><div class="fallback">${miniGraph(p)}</div></div></div>`;
 
   return `
-  <article class="project" style="animation-delay:${i * 100}ms">
+  <article class="project" aria-label="${esc(p.name)}">
+    <div class="shade"></div>
     <div class="preview-side">
       ${preview}
       ${p.sampleQuestion ? `<div class="ask"><span class="prompt">›</span><span class="typed" data-text="${esc(p.sampleQuestion)}"></span><span class="cursor"></span></div>` : ""}
@@ -456,18 +581,220 @@ function matches(p) {
   return query.split(/\s+/).filter(Boolean).every(w => hay.includes(w));
 }
 
+const deck = $("#deck");
+let pages = [];   // the .project elements currently in the deck
+let current = 0;  // index of the page facing the viewer
+let turning = false;
+
 function render() {
   const list = PROJECTS.filter(matches);
   const plural = n => `${n} project${n === 1 ? "" : "s"}`;
   $("#count").textContent = query ? `${list.length} of ${plural(PROJECTS.length)}` : plural(PROJECTS.length);
 
-  $("#projects").innerHTML = list.length
-    ? list.map(p => projectHTML(p, PROJECTS.indexOf(p))).join("") + (query ? "" : `
-      <div class="soon"><span class="orbit"></span><div><b>More projects on the way.</b> New work lands here as it ships.</div></div>`)
+  deck.innerHTML = list.length
+    ? list.map(p => projectHTML(p, PROJECTS.indexOf(p))).join("")
     : `<div class="no-results"><b>No projects match "${esc(query)}"</b>Try a project name or a skill such as Neo4j, React or LLMs.</div>`;
+
+  pages = [...deck.querySelectorAll(".project")];
+  current = 0;
+  turning = false;
+  if (pages.length) pages[0].classList.add("is-current");
+  $("#dots").innerHTML = pages.map((_, i) => `<button class="dot" aria-label="Go to project ${i + 1}"></button>`).join("");
+  $("#dots").querySelectorAll(".dot").forEach((d, i) => d.addEventListener("click", () => goTo(i)));
+  updatePager();
 
   document.querySelectorAll(".typed").forEach(typeLoop);
 }
+
+function updatePager() {
+  const pad = n => String(n).padStart(2, "0");
+  $("#pager").hidden = pages.length === 0;
+  $("#pageNo").innerHTML = `<b>${pad(current + 1)}</b> / ${pad(pages.length)}`;
+  $("#prevBtn").disabled = $("#edgePrev").disabled = current === 0;
+  $("#nextBtn").disabled = $("#edgeNext").disabled = current >= pages.length - 1;
+  $("#dots").querySelectorAll(".dot").forEach((d, i) => d.classList.toggle("on", i === current));
+
+  const name = i => pages[i] ? pages[i].getAttribute("aria-label") : "";
+  $("#peekPrev").textContent = `← ${name(current - 1)}`;
+  $("#peekNext").textContent = `Next: ${name(current + 1)} →`;
+  deck.classList.toggle("has-more", current < pages.length - 1);
+  deck.classList.toggle("has-many", current < pages.length - 2);
+}
+
+/* ---------- Page turn ----------
+   The page swings over from its left edge like a book page. While it turns
+   it is swapped for PANELS hinged side by side, each showing its slice of a
+   still copy of the page. Each panel is tilted a little more than the one
+   before, so the free edge leads and the sheet bends in a smooth arc. The
+   arc never folds back over itself, so the panels can't overlap and need no
+   3D sorting. The page beneath rises out of shadow as it's uncovered; going
+   back plays the same turn in reverse. */
+const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+const TURN_MS = 1100;
+const PANELS = 8;
+const DEG = Math.PI / 180;
+const ease = t => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+
+function buildTurn(page) {
+  const W = page.offsetWidth, H = page.offsetHeight, w = W / PANELS;
+  const el = document.createElement("div");
+  el.className = "turn";
+  const panels = [];
+  for (let i = 0; i < PANELS; i++) {
+    const panel = document.createElement("div");
+    panel.className = "panel";
+    panel.style.width = `${w + 1}px`; // 1px overlap hides seams between panels
+    panel.style.zIndex = i + 1;       // panels nearer the free edge sit nearer the viewer
+    const copy = page.cloneNode(true);
+    copy.className = "project";
+    copy.setAttribute("aria-hidden", "true");
+    copy.style.cssText = `inset:auto;left:${-i * w}px;top:0;width:${W}px;height:${H}px`;
+    copy.querySelectorAll("img").forEach(img => { img.loading = "eager"; img.removeAttribute("onload"); });
+    copy.querySelectorAll("animate").forEach(a => a.remove());
+    const lit = document.createElement("div");
+    lit.className = "lit";
+    panel.append(copy, lit);
+    el.append(panel);
+    panels.push({ panel, copy, lit });
+  }
+  deck.append(el);
+
+  // A page that scrolls on its own (phone layout, long text) keeps its scroll position
+  const info = $(".info", page);
+  for (const { copy } of panels) {
+    copy.scrollTop = page.scrollTop;
+    $(".info", copy).scrollTop = info.scrollTop;
+  }
+  return { el, panels, w };
+}
+
+/* p runs 0 (flat) to 1 (turned away). `lift` is how far the hinge has turned;
+   `bend` is the extra tilt the free edge has over the hinge, greatest mid-turn. */
+function poseTurn(k, p) {
+  const lift = 105 * DEG * p;
+  const bend = 50 * DEG * Math.sin(Math.PI * Math.min(1, p * 1.1));
+  let x = 0, z = 0;
+  k.panels.forEach((s, i) => {
+    const a = lift + bend * Math.pow((i + 0.5) / PANELS, 1.6);
+    s.panel.style.transform = `translate3d(${x}px,0,${z}px) rotateY(${-a}rad)`;
+    s.lit.style.opacity = Math.min(0.7, (1 - Math.cos(a)) * 0.8); // darker as it tilts away from the light
+    x += k.w * Math.cos(a);
+    z += k.w * Math.sin(a);
+  });
+}
+
+/* Turns `top` away from `under`; progress(t) maps time 0..1 to the pose 0..1 */
+function turnPage(top, under, progress, duration, done) {
+  top.classList.remove("is-current");
+  under.classList.remove("is-current");
+  under.classList.add("is-under");
+  const k = buildTurn(top);
+  const shade = $(".shade", under);
+  const step = p => {
+    poseTurn(k, p);
+    shade.style.opacity = 1 - p;
+    under.style.transform = `scale(${0.965 + 0.035 * p})`;
+  };
+  step(progress(0));
+  const start = performance.now();
+  const frame = now => {
+    const t = Math.min(1, (now - start) / duration);
+    step(progress(t));
+    if (t < 1) return requestAnimationFrame(frame);
+    k.el.remove();
+    shade.style.opacity = under.style.transform = "";
+    done();
+  };
+  requestAnimationFrame(frame);
+}
+
+function goTo(target) {
+  if (turning || target === current || target < 0 || target >= pages.length) return;
+  const from = pages[current], to = pages[target];
+  const forward = target > current;
+  current = target;
+  updatePager();
+  turning = true;
+  flipped = true;
+
+  const finish = () => {
+    from.classList.remove("is-current", "is-turning", "is-under");
+    to.classList.remove("is-turning", "is-under");
+    to.classList.add("is-current");
+    turning = false;
+  };
+
+  if (reduceMotion.matches) {
+    from.classList.replace("is-current", "is-under");
+    to.classList.add("is-turning");
+    to.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 250, easing: "ease-out" }).finished.then(finish);
+    return;
+  }
+
+  // The page on top is the one that turns; the other lies flat beneath it
+  if (forward) turnPage(from, to, t => ease(t), TURN_MS, finish);
+  else turnPage(to, from, t => 1 - ease(t), TURN_MS, finish);
+}
+
+const next = () => goTo(current + 1);
+const prev = () => goTo(current - 1);
+$("#nextBtn").addEventListener("click", next);
+$("#prevBtn").addEventListener("click", prev);
+$("#edgeNext").addEventListener("click", next);
+$("#edgePrev").addEventListener("click", prev);
+
+/* A one-time hint that the page can be turned: shortly after load, unless the
+   visitor has already flipped, the page's free edge lifts a little and
+   settles, and the next arrow pulses */
+let flipped = false;
+setTimeout(() => {
+  if (flipped || turning || reduceMotion.matches || current >= pages.length - 1) return;
+  const page = pages[current], nextPage = pages[current + 1];
+  turning = true;
+  turnPage(page, nextPage, t => 0.09 * Math.sin(Math.PI * t), 1300, () => {
+    nextPage.classList.remove("is-under");
+    page.classList.add("is-current");
+    turning = false;
+  });
+  const btn = $("#edgeNext");
+  btn.classList.add("nudge");
+  btn.addEventListener("animationend", () => btn.classList.remove("nudge"), { once: true });
+}, 1800);
+
+/* Mouse wheel and trackpad: flip once per gesture, but let a page that
+   scrolls on its own (long text, phone layout) scroll first */
+function canScroll(el, dy) {
+  if (!el || el.scrollHeight <= el.clientHeight + 1) return false;
+  return dy > 0 ? el.scrollTop + el.clientHeight < el.scrollHeight - 1 : el.scrollTop > 0;
+}
+let wheelSum = 0, wheelLocked = false, wheelQuiet;
+deck.addEventListener("wheel", e => {
+  const dy = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+  if (canScroll(e.target.closest(".info"), dy) || canScroll(e.target.closest(".project"), dy)) return;
+  e.preventDefault();
+  clearTimeout(wheelQuiet);
+  wheelQuiet = setTimeout(() => { wheelSum = 0; wheelLocked = false; }, 220); // gesture (and its inertia) has ended
+  if (wheelLocked || turning) return;
+  wheelSum += dy;
+  if (Math.abs(wheelSum) > 50) {
+    wheelLocked = true;
+    wheelSum > 0 ? next() : prev();
+  }
+}, { passive: false });
+
+/* Swipe left / right on touch screens */
+let touchStart = null;
+deck.addEventListener("touchstart", e => {
+  const t = e.touches[0];
+  touchStart = { x: t.clientX, y: t.clientY };
+}, { passive: true });
+deck.addEventListener("touchend", e => {
+  if (!touchStart) return;
+  const t = e.changedTouches[0];
+  const dx = t.clientX - touchStart.x, dy = t.clientY - touchStart.y;
+  touchStart = null;
+  if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) dx < 0 ? next() : prev();
+}, { passive: true });
 
 /* ---------- Search ---------- */
 const searchInput = $("#search");
@@ -481,6 +808,11 @@ $("#searchClear").addEventListener("click", () => { searchInput.value = ""; setQ
 document.addEventListener("keydown", e => {
   if (e.key === "/" && document.activeElement !== searchInput) { e.preventDefault(); searchInput.focus(); }
   if (e.key === "Escape" && document.activeElement === searchInput) { searchInput.value = ""; setQuery(""); searchInput.blur(); }
+  if (document.activeElement === searchInput) return; // arrow keys move the caret while typing
+  if (e.key === "ArrowRight" || e.key === "PageDown") { e.preventDefault(); next(); }
+  if (e.key === "ArrowLeft" || e.key === "PageUp") { e.preventDefault(); prev(); }
+  if (e.key === "Home") goTo(0);
+  if (e.key === "End") goTo(pages.length - 1);
 });
 
 /* Types the sample question, pauses, erases, repeats */

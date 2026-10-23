@@ -8,6 +8,8 @@ A single-page portfolio of the projects I've built, with a live preview, a short
 |---|---|---|
 | **TraceIQ** | Answers the "why" behind a project. It stores decisions, bugs, fixes and dependencies in a Neo4j knowledge graph, and an LLM turns plain-English questions into Cypher queries. | [Live app](https://spalanivelu1989.github.io/trace-iq/) · [Source](https://github.com/spalanivelu1989/trace-iq) |
 | **Amudham Naturals** | An online store for premium organic and natural food products, built with Next.js and React, with Razorpay checkout. | [Live site](https://amudhamnaturals.com/) |
+| **CNN Diffusion MRI Brain Segmentation** | Convolutional neural networks that segment brain MRI scans, isolating brain tissue from the surrounding structures. | [Source](https://github.com/pnlbwh/CNN-Diffusion-MRIBrain-Segmentation/) |
+| **Neuro Nutrition** | An AI-powered app that creates personalized nutrition plans for people with diabetes, using RAG over a Pinecone vector database and OpenAI. | [Live app](https://diabetes-nutrition.streamlit.app/) · [Source](https://github.com/senthilcaesar/diabetes-nutrition-app) |
 
 ## Run it
 

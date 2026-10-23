@@ -484,6 +484,32 @@ const PROJECTS = [
     links: {
       live: "https://amudhamnaturals.com/"
     }
+  },
+  {
+    id: "cnn-diffusion-mri-brain-segmentation",
+    name: "CNN Diffusion MRI Brain Segmentation",
+    image: "images/cnn-diffusion-mri.png",
+    summary:
+      "Convolutional Neural Networks (CNNs) for brain MRI segmentation, isolating brain tissue from surrounding structures.",
+    graphLabels: ["MRI volume", "Coronal", "Axial", "Sagittal", "Aggregation", "Brain mask"],
+    skills: ["Computer Vision", "Python", "Keras", "Deep Learning"],
+    links: {
+      repo: "https://github.com/pnlbwh/CNN-Diffusion-MRIBrain-Segmentation/"
+    }
+  },
+  {
+    id: "neuro-nutrition",
+    name: "Neuro Nutrition",
+    status: "Live",
+    image: "images/neuro-nutrition.png",
+    summary:
+      "An AI-powered application that creates personalized nutrition plans for individuals with diabetes.",
+    graphLabels: ["Health data", "Socio-data", "Genetic data", "RAG", "Pinecone", "Nutrition plan"],
+    skills: ["Python", "OpenAI", "Streamlit", "RAG", "Pinecone"],
+    links: {
+      live: "https://diabetes-nutrition.streamlit.app/",
+      repo: "https://github.com/senthilcaesar/diabetes-nutrition-app"
+    }
   }
 ];
 
@@ -537,15 +563,16 @@ function miniGraph(p) {
 /* ---------- Render ---------- */
 function projectHTML(p, i) {
   const host = p.links.live ? p.links.live.replace(/^https?:\/\//, "").replace(/\/$/, "") : "";
+  const screen = `<div class="screen">
+           <div class="fallback">${miniGraph(p)}</div>
+           ${p.image ? `<img src="${esc(p.image)}" alt="Screenshot of ${esc(p.name)}" loading="lazy" onerror="this.remove()" onload="this.parentNode.style.aspectRatio = this.naturalWidth + ' / ' + this.naturalHeight">` : ""}
+         </div>`;
   const preview = p.links.live
     ? `<a class="browser" href="${esc(p.links.live)}" target="_blank" rel="noopener" aria-label="Open ${esc(p.name)} live app">
          <div class="browser-bar"><i></i><i></i><i></i><span class="url">${esc(host)}</span></div>
-         <div class="screen">
-           <div class="fallback">${miniGraph(p)}</div>
-           ${p.image ? `<img src="${esc(p.image)}" alt="Screenshot of ${esc(p.name)}" loading="lazy" onerror="this.remove()" onload="this.parentNode.style.aspectRatio = this.naturalWidth + ' / ' + this.naturalHeight">` : ""}
-         </div>
+         ${screen}
        </a>`
-    : `<div class="browser"><div class="screen"><div class="fallback">${miniGraph(p)}</div></div></div>`;
+    : `<div class="browser">${screen}</div>`;
 
   return `
   <article class="project" aria-label="${esc(p.name)}">

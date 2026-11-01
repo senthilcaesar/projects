@@ -42,6 +42,37 @@
     --accent-3: var(--ctp-mauve);
     --shadow: 0 40px 90px -40px var(--ctp-crust);
     --radius: 22px;
+
+    /* Subtle Abstract Geometric Background (Softened so it never overwhelms) */
+    --bg-abstract-opacity: 0.22;
+    --bg-abstract-blend: screen;
+    --bg-grid-color: rgba(198, 208, 245, 0.03);
+    --bg-draft-guide: rgba(198, 208, 245, 0.13);
+    --bg-draft-dim: rgba(198, 208, 245, 0.05);
+    --bg-draft-center: rgba(255, 255, 255, 0.22);
+    --bg-draft-cross: rgba(239, 159, 118, 0.65);
+    --bg-draft-cross-alt: rgba(129, 200, 190, 0.65);
+    --bg-draft-text: rgba(165, 173, 206, 0.32);
+
+    --bg-g1-1: #1a2245;
+    --bg-g1-2: #243363;
+    --bg-g1-3: #344c8c;
+    --bg-g1-4: #4e6eb8;
+    --bg-g1-5: #7b84cc;
+
+    --bg-g2-1: #9e4f57;
+    --bg-g2-2: #b56c54;
+    --bg-g2-3: #bf7e58;
+    --bg-g2-4: #9d72ab;
+
+    --bg-g3-1: #0f403d;
+    --bg-g3-2: #145954;
+    --bg-g3-3: #22799c;
+    --bg-g3-4: #456bb0;
+
+    --bg-g4-1: #4c267a;
+    --bg-g4-2: #6d3396;
+    --bg-g4-3: #993352;
   }
   :root[data-theme="light"] {
     --bg: #f6f3ec;
@@ -56,6 +87,36 @@
     --accent-2: #0e9aa0;
     --accent-3: #7a4fe0;
     --shadow: 0 40px 80px -45px rgba(60, 40, 10, 0.4);
+
+    --bg-abstract-opacity: 0.18;
+    --bg-abstract-blend: multiply;
+    --bg-grid-color: rgba(21, 23, 29, 0.025);
+    --bg-draft-guide: rgba(21, 23, 29, 0.11);
+    --bg-draft-dim: rgba(21, 23, 29, 0.04);
+    --bg-draft-center: rgba(21, 23, 29, 0.18);
+    --bg-draft-cross: rgba(217, 130, 26, 0.65);
+    --bg-draft-cross-alt: rgba(14, 154, 160, 0.65);
+    --bg-draft-text: rgba(93, 98, 112, 0.32);
+
+    --bg-g1-1: #38466b;
+    --bg-g1-2: #485c8a;
+    --bg-g1-3: #5d75a8;
+    --bg-g1-4: #7991bf;
+    --bg-g1-5: #9daed1;
+
+    --bg-g2-1: #a84646;
+    --bg-g2-2: #b55c45;
+    --bg-g2-3: #bf734e;
+    --bg-g2-4: #a36199;
+
+    --bg-g3-1: #19586b;
+    --bg-g3-2: #206d82;
+    --bg-g3-3: #378da3;
+    --bg-g3-4: #577eb3;
+
+    --bg-g4-1: #572d8a;
+    --bg-g4-2: #7237ad;
+    --bg-g4-3: #a82e4e;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -73,7 +134,44 @@
   a { color: inherit; text-decoration: none; }
   button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
 
-  #graph { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; opacity: 0.6; }
+  .abstract-bg {
+    position: fixed; inset: 0; width: 100%; height: 100%;
+    z-index: 0; pointer-events: none;
+    opacity: var(--bg-abstract-opacity);
+    mix-blend-mode: var(--bg-abstract-blend);
+    transition: opacity 0.4s ease;
+  }
+  .bg-cluster {
+    will-change: transform;
+    transform-origin: center center;
+  }
+  @keyframes floatKnot {
+    0% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(-12px) rotate(0.8deg); }
+    100% { transform: translateY(8px) rotate(-0.5deg); }
+  }
+  @keyframes floatSerp {
+    0% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(14px) rotate(-0.8deg); }
+    100% { transform: translateY(-10px) rotate(0.5deg); }
+  }
+  @keyframes floatSweep {
+    0% { transform: translateY(0px) scale(1); }
+    50% { transform: translateY(6px) scale(1.02); }
+    100% { transform: translateY(-4px) scale(0.99); }
+  }
+  .bg-float-knot {
+    animation: floatKnot 26s ease-in-out infinite alternate;
+    transform-origin: center center;
+  }
+  .bg-float-serp {
+    animation: floatSerp 30s ease-in-out infinite alternate;
+    transform-origin: center center;
+  }
+  .bg-float-sweep {
+    animation: floatSweep 22s ease-in-out infinite alternate;
+    transform-origin: center center;
+  }
   header, main, footer { position: relative; z-index: 1; }
   /* Content is up to 1480px wide. --gutter keeps 84px clear on each side of the
      card for the edge arrows, taking only what the space outside .wrap can't give. */
@@ -87,61 +185,164 @@
   /* ---------- Floating header capsule ---------- */
   header.dock {
     position: relative; z-index: 10; flex: none;
-    padding: 16px calc(var(--pad) + var(--gutter)) 0;
+    padding: 18px calc(var(--pad) + var(--gutter)) 0;
     pointer-events: none; /* only the capsule itself takes clicks */
   }
   .bar {
     pointer-events: auto;
     max-width: 1480px; margin: 0 auto;
-    display: flex; align-items: center; gap: 16px;
-    padding: 6px 6px 6px 6px;
+    display: flex; align-items: center; gap: 14px;
+    padding: 7px 12px 7px 14px;
     border-radius: 999px;
-    border: 1px solid var(--line);
-    background: color-mix(in srgb, var(--card) 85%, transparent);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid color-mix(in srgb, var(--line-strong) 70%, var(--accent) 30%);
+    background: linear-gradient(135deg,
+      color-mix(in srgb, var(--card) 92%, var(--accent) 5%),
+      color-mix(in srgb, var(--card) 85%, transparent));
+    backdrop-filter: blur(28px) saturate(180%);
+    -webkit-backdrop-filter: blur(28px) saturate(180%);
+    box-shadow: 0 20px 48px -10px rgba(0, 0, 0, 0.45),
+                0 0 0 1px color-mix(in srgb, var(--accent) 20%, transparent),
+                inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    transition: all 0.3s cubic-bezier(.2,.8,.2,1);
+  }
+  :root[data-theme="light"] .bar {
+    border-color: color-mix(in srgb, var(--line-strong) 80%, var(--accent) 35%);
+    background: linear-gradient(135deg,
+      color-mix(in srgb, var(--card) 96%, var(--accent) 4%),
+      color-mix(in srgb, var(--card) 90%, transparent));
+    box-shadow: 0 16px 40px -10px rgba(60, 40, 10, 0.18),
+                0 0 0 1px color-mix(in srgb, var(--accent) 25%, transparent),
+                inset 0 1px 0 rgba(255, 255, 255, 0.95);
   }
 
   .who { display: flex; align-items: center; gap: 10px; flex: none; }
+  .who-logo-link { display: block; line-height: 0; text-decoration: none; cursor: pointer; }
+  .who-title-link { text-decoration: none; color: inherit; cursor: pointer; }
   .who-mark {
-    width: 34px; height: 34px; display: block;
-    padding: 5px 3px; object-fit: contain;
+    width: 36px; height: 36px; display: block;
+    padding: 5px 4px; object-fit: contain;
     border-radius: 50%;
-    background: #fff; /* matches the logo image's own white background */
+    background: #fff;
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 35%, var(--line-strong)),
+                0 4px 12px -2px rgba(0, 0, 0, 0.35);
+    transition: transform 0.25s cubic-bezier(.2,.8,.2,1), box-shadow 0.25s cubic-bezier(.2,.8,.2,1);
   }
-  .who h1 { font-size: 18px; font-weight: 600; letter-spacing: -0.02em; line-height: 1; white-space: nowrap; }
-  .who h1 em { font-family: "Instrument Serif", serif; font-size: 1.2em; font-weight: 400; color: var(--accent); }
+  .who-logo-link:hover .who-mark {
+    transform: scale(1.1) rotate(-3deg);
+    box-shadow: 0 0 0 2px var(--accent), 0 6px 18px -2px color-mix(in srgb, var(--accent) 55%, transparent);
+  }
+  .who h1 {
+    font-size: 18.5px;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    line-height: 1;
+    white-space: nowrap;
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+  }
+  .who h1 em {
+    font-family: "Instrument Serif", serif;
+    font-size: 1.25em;
+    font-weight: 400;
+    font-style: italic;
+    color: var(--accent);
+    text-shadow: 0 0 20px color-mix(in srgb, var(--accent) 40%, transparent);
+    transition: text-shadow 0.2s, filter 0.2s;
+  }
+  .who-title-link:hover h1 em {
+    filter: brightness(1.2);
+    text-shadow: 0 0 26px var(--accent);
+  }
 
-  .top-links { display: flex; align-items: center; flex: none; }
+  .top-links { display: flex; align-items: center; gap: 6px; flex: none; }
   .icon-btn {
     display: grid; place-items: center;
-    width: 34px; height: 34px; border-radius: 50%;
+    width: 36px; height: 36px; border-radius: 50%;
+    border: 1px solid var(--line-strong);
+    background: color-mix(in srgb, var(--card) 75%, transparent);
     color: var(--muted);
-    transition: color 0.2s;
+    box-shadow: 0 2px 8px -2px rgba(0, 0, 0, 0.22);
+    transition: all 0.22s cubic-bezier(.2,.8,.2,1);
   }
-  .icon-btn:hover { color: var(--text); }
+  .icon-btn:hover {
+    color: var(--text);
+    border-color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 15%, var(--card));
+    transform: translateY(-1px) scale(1.05);
+    box-shadow: 0 4px 14px -2px color-mix(in srgb, var(--accent) 35%, transparent);
+  }
+  .icon-btn:active {
+    transform: translateY(0) scale(0.97);
+  }
+  .icon-btn.is-active {
+    background: var(--accent);
+    color: var(--bg);
+    border-color: var(--accent);
+    box-shadow: 0 0 16px color-mix(in srgb, var(--accent) 60%, transparent);
+  }
 
   .search {
     flex: 1; min-width: 0;
     display: flex; align-items: center; gap: 10px;
-    height: 34px; padding: 0 12px;
+    height: 38px; padding: 0 14px;
     border-radius: 999px;
-    color: var(--faint);
-    transition: background 0.2s, color 0.2s;
+    background: color-mix(in srgb, var(--bg) 75%, transparent);
+    border: 1px solid color-mix(in srgb, var(--line-strong) 85%, transparent);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.16);
+    color: var(--muted);
+    transition: all 0.25s cubic-bezier(.2,.8,.2,1);
   }
-  .search:hover, .search:focus-within { background: var(--bg-2); }
-  .search:focus-within { color: var(--muted); }
+  :root[data-theme="light"] .search {
+    background: color-mix(in srgb, var(--bg) 80%, transparent);
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.08);
+  }
+  .search:hover {
+    border-color: color-mix(in srgb, var(--accent) 45%, var(--line-strong));
+    background: color-mix(in srgb, var(--bg) 90%, transparent);
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.12), 0 0 12px -3px color-mix(in srgb, var(--accent) 25%, transparent);
+  }
+  .search:focus-within {
+    background: var(--bg);
+    border-color: var(--accent);
+    color: var(--text);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent), inset 0 1px 2px rgba(0, 0, 0, 0.1);
+  }
+  .search svg {
+    flex: none;
+    color: var(--accent);
+    transition: transform 0.2s;
+  }
+  .search:focus-within svg {
+    transform: scale(1.1);
+  }
   .search input {
     flex: 1; min-width: 0; height: 100%;
     background: none; border: 0; outline: 0;
     color: var(--text); font: inherit; font-size: 14.5px;
+    font-weight: 500;
   }
-  .search input::placeholder { color: var(--faint); }
+  .search input::placeholder { color: var(--faint); font-weight: 400; }
   .search input::-webkit-search-cancel-button { display: none; }
-  .search kbd { font-family: "JetBrains Mono", monospace; font-size: 12px; color: var(--faint); }
-  .search-clear { display: none; color: var(--muted); font-size: 13px; line-height: 1; }
-  .search-clear:hover { color: var(--text); }
-  .search.has-text .search-clear { display: block; }
+  .search kbd {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11.5px; font-weight: 600;
+    color: var(--muted);
+    padding: 2px 7px;
+    border-radius: 6px;
+    background: color-mix(in srgb, var(--card) 90%, transparent);
+    border: 1px solid var(--line-strong);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  }
+  .search-clear {
+    display: none; color: var(--muted);
+    font-size: 13px; line-height: 1;
+    width: 20px; height: 20px; border-radius: 50%;
+    place-items: center;
+    transition: all 0.2s;
+  }
+  .search-clear:hover { color: var(--text); background: var(--bg-2); }
+  .search.has-text .search-clear { display: grid; }
   .search.has-text kbd { display: none; }
 
   .no-results {
@@ -152,24 +353,52 @@
   .no-results b { display: block; color: var(--text); font-size: 18px; margin-bottom: 6px; }
 
   /* ---------- Project count, in the header beside the pager ---------- */
-  .count { flex: none; font-family: "JetBrains Mono", monospace; font-size: 13px; color: var(--faint); white-space: nowrap; }
+  .count {
+    flex: none;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 12px; font-weight: 500;
+    color: var(--muted);
+    white-space: nowrap;
+    padding: 4px 11px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--bg-2) 80%, transparent);
+    border: 1px solid var(--line);
+  }
 
   /* ---------- Pager: previous / next, page number and dots ---------- */
   .pager { flex: none; display: flex; align-items: center; gap: 10px; }
   .pager[hidden] { display: none; }
   .nav-btn {
     display: grid; place-items: center;
-    width: 32px; height: 32px; border-radius: 50%;
-    border: 1px solid var(--line-strong); color: var(--muted);
-    transition: color 0.2s, border-color 0.2s, transform 0.25s cubic-bezier(.2,.8,.2,1), opacity 0.2s;
+    width: 34px; height: 34px; border-radius: 50%;
+    border: 1px solid var(--line-strong);
+    background: color-mix(in srgb, var(--card) 75%, transparent);
+    color: var(--muted);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    transition: all 0.22s cubic-bezier(.2,.8,.2,1);
   }
-  .nav-btn:hover:not(:disabled) { color: var(--text); border-color: var(--accent); transform: scale(1.06); }
-  .nav-btn:disabled { opacity: 0.3; cursor: default; }
-  .page-no { font-family: "JetBrains Mono", monospace; font-size: 13px; color: var(--muted); min-width: 56px; text-align: center; }
-  .page-no b { color: var(--text); font-weight: 500; }
+  .nav-btn:hover:not(:disabled) {
+    color: var(--text);
+    border-color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 14%, var(--card));
+    transform: translateY(-1px) scale(1.06);
+    box-shadow: 0 4px 14px -2px color-mix(in srgb, var(--accent) 35%, transparent);
+  }
+  .nav-btn:disabled { opacity: 0.28; box-shadow: none; cursor: default; }
+  .page-no { font-family: "JetBrains Mono", monospace; font-size: 13px; color: var(--muted); min-width: 58px; text-align: center; }
+  .page-no b { color: var(--text); font-weight: 600; }
   .dots { display: flex; gap: 6px; }
-  .dot { width: 8px; height: 8px; border-radius: 999px; background: var(--line-strong); transition: width 0.5s cubic-bezier(.2,.8,.2,1), background 0.5s; }
-  .dot.on { width: 22px; background: var(--accent); }
+  .dot {
+    width: 8px; height: 8px; border-radius: 999px;
+    background: color-mix(in srgb, var(--line-strong) 85%, transparent);
+    transition: width 0.4s cubic-bezier(.2,.8,.2,1), background 0.4s, box-shadow 0.4s;
+  }
+  .dot:hover { background: var(--muted); }
+  .dot.on {
+    width: 24px;
+    background: var(--accent);
+    box-shadow: 0 0 10px color-mix(in srgb, var(--accent) 70%, transparent);
+  }
 
   /* ---------- Deck: one project per page, turned over like a sheet of paper ---------- */
   .deck {
@@ -385,19 +614,570 @@
     .search { order: 3; flex: 1 1 calc(100% - 150px); background: var(--bg-2); } /* second line: search beside the pager */
     .pager { order: 4; gap: 6px; }
   }
+  @keyframes floatSpiral {
+    0% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(-10px) rotate(-0.6deg); }
+    100% { transform: translateY(10px) rotate(0.4deg); }
+  }
+  @keyframes floatVault {
+    0% { transform: translateY(0px) scale(1); }
+    50% { transform: translateY(-8px) scale(1.015); }
+    100% { transform: translateY(6px) scale(0.99); }
+  }
+  @keyframes floatMandala {
+    0% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(10px) rotate(0.5deg); }
+    100% { transform: translateY(-8px) rotate(-0.4deg); }
+  }
+  @keyframes floatArcade {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(8px); }
+    100% { transform: translateY(-6px); }
+  }
+  @keyframes floatNetwork {
+    0% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(-12px) rotate(0.7deg); }
+    100% { transform: translateY(8px) rotate(-0.5deg); }
+  }
+  .bg-float-spiral {
+    animation: floatSpiral 28s ease-in-out infinite alternate;
+    transform-origin: center center;
+  }
+  .bg-float-vault {
+    animation: floatVault 24s ease-in-out infinite alternate;
+    transform-origin: center center;
+  }
+  .bg-float-mandala {
+    animation: floatMandala 32s ease-in-out infinite alternate;
+    transform-origin: center center;
+  }
+  .bg-float-arcade {
+    animation: floatArcade 27s ease-in-out infinite alternate;
+    transform-origin: center center;
+  }
+  .bg-float-network {
+    animation: floatNetwork 29s ease-in-out infinite alternate;
+    transform-origin: center center;
+  }
+
+  /* ---------- Foreground / Background View Switch ---------- */
+  .wrap {
+    transition: opacity 0.35s cubic-bezier(.2,.8,.2,1), transform 0.35s cubic-bezier(.2,.8,.2,1);
+  }
+  body.view-background .wrap {
+    opacity: 0;
+    pointer-events: none;
+    transform: scale(0.96);
+  }
+  body.view-background .abstract-bg {
+    opacity: 0.85;
+    pointer-events: auto;
+    cursor: pointer;
+  }
+  body.view-background .dock .bar {
+    background: linear-gradient(135deg,
+      color-mix(in srgb, var(--card) 75%, var(--accent) 6%),
+      color-mix(in srgb, var(--card) 60%, transparent));
+    backdrop-filter: blur(28px) saturate(190%);
+    -webkit-backdrop-filter: blur(28px) saturate(190%);
+  }
+
+  .bg-return-pill {
+    position: fixed;
+    bottom: 28px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 18px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--card) 85%, transparent);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--line-strong);
+    color: var(--text);
+    font-size: 13px;
+    font-weight: 500;
+    box-shadow: 0 16px 40px -8px rgba(0, 0, 0, 0.4);
+    opacity: 0;
+    pointer-events: none;
+    z-index: 100;
+    cursor: pointer;
+    transition: opacity 0.3s cubic-bezier(.2,.8,.2,1), transform 0.3s cubic-bezier(.2,.8,.2,1), background 0.2s, color 0.2s;
+  }
+  .bg-return-pill:hover {
+    background: var(--text);
+    color: var(--bg);
+    transform: translateX(-50%) translateY(0) scale(1.03);
+  }
+  .bg-return-pill:hover .bg-pill-dot {
+    background: var(--bg);
+  }
+  .bg-return-pill:hover .bg-pill-back {
+    color: var(--bg);
+    opacity: 0.85;
+  }
+  .bg-pill-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 8px var(--accent);
+  }
+  .bg-pill-back {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11.5px;
+    color: var(--muted);
+    padding-left: 6px;
+    border-left: 1px solid var(--line-strong);
+  }
+  body.view-background .bg-return-pill {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateX(-50%) translateY(0);
+  }
+
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { animation: none !important; transition: none !important; }
   }
 </style>
 </head>
 <body>
-<canvas id="graph" aria-hidden="true"></canvas>
+<svg id="abstractBg" class="abstract-bg" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+  <defs>
+    <!-- Blueprint micro-grid -->
+    <pattern id="blueprint-grid" width="70" height="70" patternUnits="userSpaceOnUse">
+      <path d="M 35 30 L 35 40 M 30 35 L 40 35" stroke="var(--bg-grid-color)" stroke-width="0.8" />
+      <circle cx="35" cy="35" r="0.8" fill="var(--bg-grid-color)" />
+    </pattern>
+
+    <!-- Precision Drafting Crosshair Markers -->
+    <g id="cross">
+      <line x1="-9" y1="0" x2="9" y2="0" stroke="var(--bg-draft-cross)" stroke-width="1.3" />
+      <line x1="0" y1="-9" x2="0" y2="9" stroke="var(--bg-draft-cross)" stroke-width="1.3" />
+      <circle cx="0" cy="0" r="1.5" fill="var(--bg-draft-cross)" />
+    </g>
+    <g id="cross-alt">
+      <line x1="-9" y1="0" x2="9" y2="0" stroke="var(--bg-draft-cross-alt)" stroke-width="1.3" />
+      <line x1="0" y1="-9" x2="0" y2="9" stroke="var(--bg-draft-cross-alt)" stroke-width="1.3" />
+      <circle cx="0" cy="0" r="1.5" fill="var(--bg-draft-cross-alt)" />
+    </g>
+
+    <!-- Gradients matching constructivist ribbons and themes -->
+    <linearGradient id="g-blue-lavender" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="var(--bg-g1-1)" />
+      <stop offset="25%" stop-color="var(--bg-g1-2)" />
+      <stop offset="55%" stop-color="var(--bg-g1-3)" />
+      <stop offset="80%" stop-color="var(--bg-g1-4)" />
+      <stop offset="100%" stop-color="var(--bg-g1-5)" />
+    </linearGradient>
+
+    <linearGradient id="g-coral-peach" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="var(--bg-g2-1)" />
+      <stop offset="35%" stop-color="var(--bg-g2-2)" />
+      <stop offset="70%" stop-color="var(--bg-g2-3)" />
+      <stop offset="100%" stop-color="var(--bg-g2-4)" />
+    </linearGradient>
+
+    <linearGradient id="g-teal-cyan" x1="0%" y1="0%" x2="80%" y2="100%">
+      <stop offset="0%" stop-color="var(--bg-g3-1)" />
+      <stop offset="35%" stop-color="var(--bg-g3-2)" />
+      <stop offset="70%" stop-color="var(--bg-g3-3)" />
+      <stop offset="100%" stop-color="var(--bg-g3-4)" />
+    </linearGradient>
+
+    <linearGradient id="g-violet-rose" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="var(--bg-g4-1)" />
+      <stop offset="50%" stop-color="var(--bg-g4-2)" />
+      <stop offset="100%" stop-color="var(--bg-g4-3)" />
+    </linearGradient>
+
+    <!-- Ribbon overlap depth filter -->
+    <filter id="ribbon-shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="2" dy="8" stdDeviation="10" flood-color="#000" flood-opacity="0.32" />
+    </filter>
+  </defs>
+
+  <!-- Base Grid Fill -->
+  <rect width="100%" height="100%" fill="url(#blueprint-grid)" />
+
+  <!-- Global Master Blueprint Datum Grid Lines -->
+  <g class="bg-draft-element" stroke="var(--bg-draft-dim)" stroke-width="0.8">
+    <line x1="0" y1="200" x2="1920" y2="200" stroke-dasharray="8 8" />
+    <line x1="0" y1="520" x2="1920" y2="520" stroke-dasharray="12 12" />
+    <line x1="0" y1="880" x2="1920" y2="880" stroke-dasharray="8 8" />
+    <line x1="360" y1="0" x2="360" y2="1080" stroke-dasharray="6 8" />
+    <line x1="960" y1="0" x2="960" y2="1080" stroke-dasharray="4 8" />
+    <line x1="1520" y1="0" x2="1520" y2="1080" stroke-dasharray="6 8" />
+  </g>
+
+  <!-- ========================================================
+       CLUSTER 1: Angkor Wat Cosmic Mandala (Top-Left)
+       Sacred Astronomy & Ancient Temple Enclosures
+       ======================================================== -->
+  <g class="bg-cluster" id="cluster-angkor" transform="translate(360, 200)">
+    <g class="bg-float-mandala">
+      <line class="bg-draft-element" x1="-280" y1="116" x2="280" y2="-116" stroke="var(--bg-draft-cross)" stroke-width="0.9" stroke-dasharray="5 5" />
+      <line class="bg-draft-element" x1="-280" y1="-116" x2="280" y2="116" stroke="var(--bg-draft-cross-alt)" stroke-width="0.9" stroke-dasharray="5 5" />
+      <line class="bg-draft-element" x1="0" y1="-260" x2="0" y2="260" stroke="var(--bg-draft-dim)" stroke-width="0.8" />
+      <line class="bg-draft-element" x1="-260" y1="0" x2="260" y2="0" stroke="var(--bg-draft-dim)" stroke-width="0.8" />
+
+      <rect x="-220" y="-180" width="440" height="360" rx="40"
+        fill="none" stroke="url(#g-blue-lavender)" stroke-width="40" stroke-linejoin="round" opacity="0.85" />
+      <rect x="-140" y="-110" width="280" height="220" rx="25"
+        fill="none" stroke="url(#g-coral-peach)" stroke-width="28" stroke-linejoin="round" opacity="0.8" />
+
+      <!-- Quincunx 5-Prasat Towers -->
+      <circle cx="0" cy="0" r="28" fill="var(--card)" stroke="var(--bg-draft-guide)" stroke-width="1.5" />
+      <circle cx="0" cy="0" r="14" fill="url(#g-teal-cyan)" />
+      <use class="bg-draft-element" href="#cross" x="0" y="0" />
+
+      <circle cx="-80" cy="-60" r="18" fill="var(--card)" stroke="var(--bg-draft-guide)" stroke-width="1.2" />
+      <circle cx="-80" cy="-60" r="8" fill="url(#g-violet-rose)" />
+      <use class="bg-draft-element" href="#cross" x="-80" y="-60" />
+
+      <circle cx="80" cy="-60" r="18" fill="var(--card)" stroke="var(--bg-draft-guide)" stroke-width="1.2" />
+      <circle cx="80" cy="-60" r="8" fill="url(#g-violet-rose)" />
+      <use class="bg-draft-element" href="#cross" x="80" y="-60" />
+
+      <circle cx="-80" cy="60" r="18" fill="var(--card)" stroke="var(--bg-draft-guide)" stroke-width="1.2" />
+      <circle cx="-80" cy="60" r="8" fill="url(#g-violet-rose)" />
+      <use class="bg-draft-element" href="#cross-alt" x="-80" y="60" />
+
+      <circle cx="80" cy="60" r="18" fill="var(--card)" stroke="var(--bg-draft-guide)" stroke-width="1.2" />
+      <circle cx="80" cy="60" r="8" fill="url(#g-violet-rose)" />
+      <use class="bg-draft-element" href="#cross-alt" x="80" y="60" />
+
+      <g class="bg-draft-element" font-family="'JetBrains Mono', monospace" font-size="9" fill="var(--bg-draft-text)" letter-spacing="1">
+        <text x="-210" y="-195">ANGKOR WAT // MERU COSMOGRAM</text>
+        <text x="-210" y="205">AZ 67.5° SOLSTICE AXIS · QUINCUNX</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- ========================================================
+       CLUSTER 2: Gothic Rib Vault & Rose Tracery (Top-Center)
+       Pointed Ogival Arches & Quadripartite Crossing Ribs
+       ======================================================== -->
+  <g class="bg-cluster" id="cluster-gothic" transform="translate(960, 150)">
+    <g class="bg-float-vault">
+      <line class="bg-draft-element" x1="-240" y1="180" x2="240" y2="180" stroke="var(--bg-draft-dim)" stroke-width="0.8" />
+      <line class="bg-draft-element" x1="0" y1="-140" x2="0" y2="200" stroke="var(--bg-draft-dim)" stroke-width="0.8" stroke-dasharray="4 6" />
+
+      <!-- Lancet Arches -->
+      <path d="M -160 180 A 300 300 0 0 1 0 -80 A 300 300 0 0 1 160 180"
+        fill="none" stroke="url(#g-blue-lavender)" stroke-width="44" stroke-linecap="round" />
+
+      <!-- Diagonal Quadripartite Ribs -->
+      <path d="M -120 160 L 120 -50 M 120 160 L -120 -50"
+        fill="none" stroke="url(#g-coral-peach)" stroke-width="30" stroke-linecap="round" opacity="0.85" />
+
+      <path class="bg-draft-element" d="M -160 180 A 300 300 0 0 1 0 -80 A 300 300 0 0 1 160 180"
+        fill="none" stroke="var(--bg-draft-center)" stroke-width="1.2" stroke-dasharray="7 5" stroke-linecap="round" />
+
+      <!-- Keystone Boss -->
+      <circle cx="0" cy="-80" r="24" fill="var(--card)" stroke="var(--bg-draft-guide)" stroke-width="1.5" />
+      <circle cx="0" cy="-80" r="12" fill="url(#g-teal-cyan)" />
+      <use class="bg-draft-element" href="#cross" x="0" y="-80" />
+
+      <!-- Rose Window Tracery -->
+      <circle class="bg-draft-element" cx="0" cy="50" r="54" fill="none" stroke="var(--bg-draft-guide)" stroke-width="0.8" stroke-dasharray="3 3" />
+      <circle cx="0" cy="50" r="20" fill="var(--card)" stroke="var(--bg-draft-guide)" stroke-width="1.2" />
+      <circle cx="0" cy="50" r="9" fill="url(#g-violet-rose)" />
+      <use class="bg-draft-element" href="#cross-alt" x="0" y="50" />
+
+      <g class="bg-draft-element" font-family="'JetBrains Mono', monospace" font-size="9" fill="var(--bg-draft-text)" letter-spacing="1">
+        <text x="-150" y="-95">GOTHIC VAULT // OGIVAL RIB</text>
+        <text x="35" y="-95">KEYSTONE BOSS ⊕ 12.4kN</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- ========================================================
+       CLUSTER 3: Celestial Radial Dial (Top-Right / Header)
+       Concentric Compass Horizon & Radiating Blades
+       ======================================================== -->
+  <g class="bg-cluster" id="cluster-radial" transform="translate(1440, 140)">
+    <g class="bg-float-sweep">
+      <circle class="bg-draft-element" cx="0" cy="0" r="60" fill="none" stroke="var(--bg-draft-guide)" stroke-width="0.8" stroke-dasharray="4 4" />
+      <circle class="bg-draft-element" cx="0" cy="0" r="110" fill="none" stroke="var(--bg-draft-dim)" stroke-width="0.8" />
+      <circle class="bg-draft-element" cx="0" cy="0" r="160" fill="none" stroke="var(--bg-draft-guide)" stroke-width="0.8" stroke-dasharray="6 6" />
+
+      <path d="M -70 -16 L 70 -16 A 16 16 0 0 1 70 20 L -70 20 A 16 16 0 0 1 -70 -16 Z"
+        fill="url(#g-violet-rose)" opacity="0.6" transform="rotate(-20)" />
+      <path d="M -60 -14 L 60 -14 A 14 14 0 0 1 60 18 L -60 18 A 14 14 0 0 1 -60 -14 Z"
+        fill="url(#g-teal-cyan)" opacity="0.55" transform="rotate(35)" />
+      <path d="M -50 -12 L 50 -12 A 12 12 0 0 1 50 16 L -50 16 A 12 12 0 0 1 -50 -12 Z"
+        fill="url(#g-coral-peach)" opacity="0.55" transform="rotate(85)" />
+
+      <circle cx="0" cy="0" r="14" fill="none" stroke="var(--bg-draft-cross)" stroke-width="1.2" />
+      <use class="bg-draft-element" href="#cross" x="0" y="0" />
+
+      <g class="bg-draft-element" font-family="'JetBrains Mono', monospace" font-size="9" fill="var(--bg-draft-text)" letter-spacing="1">
+        <text x="-90" y="130">CELESTIAL DIAL // 360°</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- ========================================================
+       CLUSTER 4: Interlocking Infinity Knot Rig (Upper-Right)
+       Constructivist Dual Stadiums with Tangent Precision
+       ======================================================== -->
+  <g class="bg-cluster" id="cluster-knot" transform="translate(1520, 440)">
+    <g class="bg-float-knot">
+      <circle class="bg-draft-element" cx="0" cy="0" r="240" fill="none" stroke="var(--bg-draft-dim)" stroke-width="0.8" stroke-dasharray="6 6" />
+      <circle class="bg-draft-element" cx="0" cy="0" r="300" fill="none" stroke="var(--bg-draft-dim)" stroke-width="0.8" />
+      <line class="bg-draft-element" x1="-320" y1="0" x2="320" y2="0" stroke="var(--bg-draft-dim)" stroke-width="0.8" stroke-dasharray="4 6" />
+      <line class="bg-draft-element" x1="0" y1="-320" x2="0" y2="320" stroke="var(--bg-draft-dim)" stroke-width="0.8" stroke-dasharray="4 6" />
+
+      <!-- Loop A: Blue/Lavender (-28 deg) -->
+      <g transform="rotate(-28)">
+        <line class="bg-draft-element" x1="0" y1="-260" x2="0" y2="260" stroke="var(--bg-draft-guide)" stroke-width="0.8" stroke-dasharray="5 5" />
+        <circle class="bg-draft-element" cx="0" cy="-140" r="70" fill="none" stroke="var(--bg-draft-guide)" stroke-width="0.9" stroke-dasharray="3 3" />
+        <circle class="bg-draft-element" cx="0" cy="140" r="70" fill="none" stroke="var(--bg-draft-guide)" stroke-width="0.9" stroke-dasharray="3 3" />
+
+        <path d="M -70 -140 L -70 140 A 70 70 0 0 0 70 140 L 70 -140 A 70 70 0 0 0 -70 -140 Z M -24 -140 A 24 24 0 0 1 24 -140 L 24 140 A 24 24 0 0 1 -24 140 Z"
+          fill="url(#g-blue-lavender)" fill-rule="evenodd" />
+
+        <path class="bg-draft-element" d="M -47 -140 L -47 140 A 47 47 0 0 0 47 140 L 47 -140 A 47 47 0 0 0 -47 -140 Z"
+          fill="none" stroke="var(--bg-draft-center)" stroke-width="1.2" stroke-dasharray="8 6" />
+        <use class="bg-draft-element" href="#cross" x="0" y="-140" />
+        <use class="bg-draft-element" href="#cross" x="0" y="140" />
+      </g>
+
+      <!-- Loop B: Coral/Peach (+36 deg) -->
+      <g transform="rotate(36)">
+        <line class="bg-draft-element" x1="0" y1="-240" x2="0" y2="240" stroke="var(--bg-draft-guide)" stroke-width="0.8" stroke-dasharray="5 5" />
+        <circle class="bg-draft-element" cx="0" cy="-130" r="65" fill="none" stroke="var(--bg-draft-guide)" stroke-width="0.9" stroke-dasharray="3 3" />
+        <circle class="bg-draft-element" cx="0" cy="130" r="65" fill="none" stroke="var(--bg-draft-guide)" stroke-width="0.9" stroke-dasharray="3 3" />
+
+        <path d="M -65 -130 L -65 130 A 65 65 0 0 0 65 130 L 65 -130 A 65 65 0 0 0 -65 -130 Z M -22 -130 A 22 22 0 0 1 22 -130 L 22 130 A 22 22 0 0 1 -22 130 Z"
+          fill="url(#g-coral-peach)" fill-rule="evenodd" filter="url(#ribbon-shadow)" opacity="0.92" />
+
+        <path class="bg-draft-element" d="M -44 -130 L -44 130 A 44 44 0 0 0 44 130 L 44 -130 A 44 44 0 0 0 -44 -130 Z"
+          fill="none" stroke="var(--bg-draft-center)" stroke-width="1.2" stroke-dasharray="8 6" />
+        <use class="bg-draft-element" href="#cross-alt" x="0" y="-130" />
+        <use class="bg-draft-element" href="#cross-alt" x="0" y="130" />
+      </g>
+
+      <g class="bg-draft-element" font-family="'JetBrains Mono', monospace" font-size="9" fill="var(--bg-draft-text)" letter-spacing="1.2">
+        <text x="100" y="-170">SEC A-A · R:70.0</text>
+        <text x="-190" y="180">DATUM ⊕ 42.8°</text>
+        <text x="80" y="220">MOD. 01 // KNOT</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- ========================================================
+       CLUSTER 5: Nautilus Logarithmic Golden Spiral (Center / Mid-Depth)
+       Nature's Proportion (Phi = 1.618) & Fibonacci Rectangles
+       ======================================================== -->
+  <g class="bg-cluster" id="cluster-nautilus" transform="translate(1080, 530)">
+    <g class="bg-float-spiral">
+      <rect class="bg-draft-element" x="-233" y="-144" width="377" height="233" fill="none" stroke="var(--bg-draft-dim)" stroke-width="0.8" stroke-dasharray="4 6" />
+      <rect class="bg-draft-element" x="-233" y="-144" width="233" height="233" fill="none" stroke="var(--bg-draft-dim)" stroke-width="0.8" />
+      <rect class="bg-draft-element" x="0" y="-144" width="144" height="144" fill="none" stroke="var(--bg-draft-dim)" stroke-width="0.8" />
+      <rect class="bg-draft-element" x="55" y="0" width="89" height="89" fill="none" stroke="var(--bg-draft-dim)" stroke-width="0.8" />
+
+      <!-- Golden Angle 137.5° Rays -->
+      <line class="bg-draft-element" x1="0" y1="0" x2="300" y2="0" stroke="var(--bg-draft-dim)" stroke-width="0.8" />
+      <line class="bg-draft-element" x1="0" y1="0" x2="-220" y2="200" stroke="var(--bg-draft-dim)" stroke-width="0.8" stroke-dasharray="3 5" />
+      <line class="bg-draft-element" x1="0" y1="0" x2="-50" y2="-290" stroke="var(--bg-draft-dim)" stroke-width="0.8" stroke-dasharray="3 5" />
+
+      <!-- Logarithmic Spiral Ribbon -->
+      <path d="M 0 0
+        A 55 55 0 0 1 55 -55
+        A 89 89 0 0 1 144 34
+        A 144 144 0 0 1 0 178
+        A 233 233 0 0 1 -233 -55
+        A 377 377 0 0 1 144 -432"
+        fill="none" stroke="url(#g-teal-cyan)" stroke-width="46" stroke-linecap="round" opacity="0.75" />
+
+      <path class="bg-draft-element" d="M 0 0
+        A 55 55 0 0 1 55 -55
+        A 89 89 0 0 1 144 34
+        A 144 144 0 0 1 0 178
+        A 233 233 0 0 1 -233 -55
+        A 377 377 0 0 1 144 -432"
+        fill="none" stroke="var(--bg-draft-center)" stroke-width="1.2" stroke-dasharray="8 6" stroke-linecap="round" />
+
+      <circle class="bg-draft-element" cx="0" cy="0" r="144" fill="none" stroke="var(--bg-draft-guide)" stroke-width="0.8" stroke-dasharray="3 4" />
+      <use class="bg-draft-element" href="#cross" x="0" y="0" />
+      <use class="bg-draft-element" href="#cross-alt" x="-144" y="0" />
+
+      <g class="bg-draft-element" font-family="'JetBrains Mono', monospace" font-size="9" fill="var(--bg-draft-text)" letter-spacing="1">
+        <text x="-210" y="-155">PHI Φ = 1.618033 · GOLDEN SPIRAL</text>
+        <text x="110" y="-155">α = 137.5°</text>
+        <text x="-260" y="205">LOG SPIRAL r = a·e^(bθ)</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- ========================================================
+       CLUSTER 6: Sigiriya Citadel & Water Gardens (Mid-Left)
+       8th Wonder of the World · Ancient Hydraulic Labyrinth
+       ======================================================== -->
+  <g class="bg-cluster" id="cluster-sigiriya" transform="translate(280, 520)">
+    <g class="bg-float-serp">
+      <rect class="bg-draft-element" x="-230" y="-250" width="460" height="500" fill="none" stroke="var(--bg-draft-dim)" stroke-width="0.8" stroke-dasharray="5 5" />
+      <line class="bg-draft-element" x1="0" y1="-280" x2="0" y2="280" stroke="var(--bg-draft-dim)" stroke-width="0.8" />
+      <line class="bg-draft-element" x1="-260" y1="0" x2="260" y2="0" stroke="var(--bg-draft-dim)" stroke-width="0.8" />
+
+      <rect x="-190" y="-210" width="380" height="420" rx="40"
+        fill="none" stroke="url(#g-teal-cyan)" stroke-width="44" stroke-linejoin="round" />
+
+      <rect x="-115" y="-130" width="230" height="260" rx="25"
+        fill="none" stroke="url(#g-coral-peach)" stroke-width="32" stroke-linejoin="round" opacity="0.88" />
+
+      <circle cx="0" cy="0" r="38" fill="var(--card)" stroke="var(--bg-draft-guide)" stroke-width="1.5" />
+      <circle cx="0" cy="0" r="20" fill="url(#g-blue-lavender)" />
+      <circle cx="0" cy="0" r="8" fill="var(--bg-draft-cross)" />
+      <use class="bg-draft-element" href="#cross" x="0" y="0" />
+
+      <use class="bg-draft-element" href="#cross" x="-140" y="-120" />
+      <use class="bg-draft-element" href="#cross" x="140" y="-120" />
+      <use class="bg-draft-element" href="#cross-alt" x="-140" y="120" />
+      <use class="bg-draft-element" href="#cross-alt" x="140" y="120" />
+
+      <g class="bg-draft-element" font-family="'JetBrains Mono', monospace" font-size="9" fill="var(--bg-draft-text)" letter-spacing="1">
+        <text x="-180" y="-225">SIGIRIYA // 8TH WONDER OF THE WORLD</text>
+        <text x="-210" y="10">ELEV 370m AOD · CITADEL</text>
+        <text x="-110" y="240">HYDRAULIC Δh = 12.4m · Q = 4.2 m³/s</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- ========================================================
+       CLUSTER 7: Biomimetic Mycelial Network (Mid-Right / Lower-Right)
+       Fungal Hyphae Anastomosis & Delaunay Triangulation
+       ======================================================== -->
+  <g class="bg-cluster" id="cluster-mycelium" transform="translate(1620, 800)">
+    <g class="bg-float-network">
+      <polygon class="bg-draft-element" points="-140,160 70,-120 160,70" fill="none" stroke="var(--bg-draft-dim)" stroke-width="0.8" stroke-dasharray="4 6" />
+      <polygon class="bg-draft-element" points="70,-120 -70,-70 160,70" fill="none" stroke="var(--bg-draft-dim)" stroke-width="0.8" stroke-dasharray="4 6" />
+
+      <path d="M -190 210 C -140 160 -90 100 -50 30 C -20 -20 10 -70 70 -120"
+        fill="none" stroke="url(#g-teal-cyan)" stroke-width="44" stroke-linecap="round" />
+
+      <path d="M -50 30 C 0 70 70 100 160 70 C 210 40 230 -30 180 -80"
+        fill="none" stroke="url(#g-coral-peach)" stroke-width="34" stroke-linecap="round" opacity="0.88" />
+
+      <path d="M 70 -120 C 120 -100 140 -30 160 70"
+        fill="none" stroke="url(#g-blue-lavender)" stroke-width="28" stroke-linecap="round" opacity="0.8" />
+
+      <circle cx="70" cy="-120" r="22" fill="var(--card)" stroke="var(--bg-draft-guide)" stroke-width="1.2" />
+      <circle cx="70" cy="-120" r="9" fill="url(#g-teal-cyan)" />
+      <use class="bg-draft-element" href="#cross" x="70" y="-120" />
+
+      <circle cx="160" cy="70" r="20" fill="var(--card)" stroke="var(--bg-draft-guide)" stroke-width="1.2" />
+      <circle cx="160" cy="70" r="8" fill="url(#g-coral-peach)" />
+      <use class="bg-draft-element" href="#cross-alt" x="160" y="70" />
+
+      <circle cx="-50" cy="30" r="22" fill="var(--card)" stroke="var(--bg-draft-guide)" stroke-width="1.2" />
+      <circle cx="-50" cy="30" r="9" fill="url(#g-coral-peach)" />
+      <use class="bg-draft-element" href="#cross" x="-50" y="30" />
+
+      <g class="bg-draft-element" font-family="'JetBrains Mono', monospace" font-size="9" fill="var(--bg-draft-text)" letter-spacing="1">
+        <text x="-200" y="-140">MYCELIAL NETWORK // OPTIMAL HYPHAE</text>
+        <text x="-180" y="240">ANASTOMOSIS α=60° · v=1.8 µm/s</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- ========================================================
+       CLUSTER 8: Serpentine Orthogonal Circuit (Bottom-Left)
+       90° & 180° Sweeping Tubular Bends & Circular Core Hub
+       ======================================================== -->
+  <g class="bg-cluster" id="cluster-serpentine" transform="translate(220, 890)">
+    <g class="bg-float-serp">
+      <path d="M 120 -230 L -50 -230 A 60 60 0 0 0 -110 -170 L -110 -40 A 60 60 0 0 0 -50 20 L 50 20 A 60 60 0 0 1 110 80 L 110 180 A 60 60 0 0 1 50 240 L -100 240"
+        fill="none" stroke="url(#g-teal-cyan)" stroke-width="46" stroke-linecap="round" stroke-linejoin="round" />
+
+      <path class="bg-draft-element" d="M 120 -230 L -50 -230 A 60 60 0 0 0 -110 -170 L -110 -40 A 60 60 0 0 0 -50 20 L 50 20 A 60 60 0 0 1 110 80 L 110 180 A 60 60 0 0 1 50 240 L -100 240"
+        fill="none" stroke="var(--bg-draft-center)" stroke-width="1.2" stroke-dasharray="8 6" stroke-linecap="round" />
+
+      <circle cx="-100" cy="240" r="28" fill="var(--card)" stroke="var(--bg-draft-guide)" stroke-width="1.5" />
+      <circle cx="-100" cy="240" r="14" fill="url(#g-blue-lavender)" />
+      <use class="bg-draft-element" href="#cross" x="-100" y="240" />
+      <use class="bg-draft-element" href="#cross" x="-50" y="-170" />
+      <use class="bg-draft-element" href="#cross-alt" x="50" y="80" />
+
+      <g class="bg-draft-element" font-family="'JetBrains Mono', monospace" font-size="9" fill="var(--bg-draft-text)" letter-spacing="1">
+        <text x="-80" y="290">ORIGIN 0,0 · Ø52 // REV 2</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- ========================================================
+       CLUSTER 9: Bauhaus Matrix & Isometric Highway (Bottom-Center-Left)
+       Modular Cartesian Grid & 45° Poly-Ribbons
+       ======================================================== -->
+  <g class="bg-cluster" id="cluster-matrix" transform="translate(680, 930)">
+    <g class="bg-float-sweep">
+      <line class="bg-draft-element" x1="-160" y1="-80" x2="160" y2="-80" stroke="var(--bg-draft-dim)" stroke-width="0.8" stroke-dasharray="4 6" />
+      <line class="bg-draft-element" x1="-160" y1="60" x2="160" y2="60" stroke="var(--bg-draft-dim)" stroke-width="0.8" stroke-dasharray="4 6" />
+      <line class="bg-draft-element" x1="-80" y1="-140" x2="-80" y2="140" stroke="var(--bg-draft-dim)" stroke-width="0.8" stroke-dasharray="4 6" />
+      <line class="bg-draft-element" x1="80" y1="-140" x2="80" y2="140" stroke="var(--bg-draft-dim)" stroke-width="0.8" stroke-dasharray="4 6" />
+
+      <path d="M -140 100 L -40 0 L 60 100 L 160 0"
+        fill="none" stroke="url(#g-violet-rose)" stroke-width="36" stroke-linecap="round" stroke-linejoin="round" opacity="0.85" />
+      <path d="M -80 -100 L 20 0 L 120 -100"
+        fill="none" stroke="url(#g-blue-lavender)" stroke-width="28" stroke-linecap="round" stroke-linejoin="round" opacity="0.75" />
+
+      <circle cx="-40" cy="0" r="16" fill="var(--card)" stroke="var(--bg-draft-guide)" stroke-width="1.2" />
+      <circle cx="-40" cy="0" r="7" fill="url(#g-coral-peach)" />
+      <use class="bg-draft-element" href="#cross" x="-40" y="0" />
+
+      <circle cx="60" cy="100" r="16" fill="var(--card)" stroke="var(--bg-draft-guide)" stroke-width="1.2" />
+      <circle cx="60" cy="100" r="7" fill="url(#g-teal-cyan)" />
+      <use class="bg-draft-element" href="#cross-alt" x="60" y="100" />
+
+      <g class="bg-draft-element" font-family="'JetBrains Mono', monospace" font-size="9" fill="var(--bg-draft-text)" letter-spacing="1">
+        <text x="-130" y="130">BAUHAUS MODULAR GRID // 45°</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- ========================================================
+       CLUSTER 10: Babylon Suspended Arcade & Aqueducts (Bottom-Center-Right)
+       Ancient Mesopotamian Hanging Gardens & Gravity Canals
+       ======================================================== -->
+  <g class="bg-cluster" id="cluster-babylon" transform="translate(1260, 920)">
+    <g class="bg-float-arcade">
+      <line class="bg-draft-element" x1="-220" y1="50" x2="220" y2="50" stroke="var(--bg-draft-dim)" stroke-width="0.8" />
+      <line class="bg-draft-element" x1="-220" y1="160" x2="220" y2="160" stroke="var(--bg-draft-dim)" stroke-width="0.8" stroke-dasharray="4 6" />
+
+      <path d="M -200 160 A 50 50 0 0 1 -100 160 M -100 160 A 50 50 0 0 1 0 160 M 0 160 A 50 50 0 0 1 100 160 M 100 160 A 50 50 0 0 1 200 160"
+        fill="none" stroke="url(#g-blue-lavender)" stroke-width="36" stroke-linecap="round" />
+
+      <path d="M -220 50 L 220 50"
+        fill="none" stroke="url(#g-teal-cyan)" stroke-width="30" stroke-linecap="round" opacity="0.85" />
+
+      <line class="bg-draft-element" x1="-100" y1="50" x2="-100" y2="180" stroke="var(--bg-draft-dim)" stroke-width="0.8" stroke-dasharray="3 4" />
+      <line class="bg-draft-element" x1="0" y1="50" x2="0" y2="180" stroke="var(--bg-draft-dim)" stroke-width="0.8" stroke-dasharray="3 4" />
+      <line class="bg-draft-element" x1="100" y1="50" x2="100" y2="180" stroke="var(--bg-draft-dim)" stroke-width="0.8" stroke-dasharray="3 4" />
+
+      <use class="bg-draft-element" href="#cross" x="-100" y="160" />
+      <use class="bg-draft-element" href="#cross" x="0" y="160" />
+      <use class="bg-draft-element" href="#cross" x="100" y="160" />
+
+      <g class="bg-draft-element" font-family="'JetBrains Mono', monospace" font-size="9" fill="var(--bg-draft-text)" letter-spacing="1">
+        <text x="-190" y="25">BABYLON // SUSPENDED ARCADE</text>
+        <text x="-90" y="195">AQUEDUCT GRADIENT 1:400 · +28.5m</text>
+      </g>
+    </g>
+  </g>
+</svg>
 
 <header class="dock" id="dock">
   <div class="bar">
     <div class="who">
-      <img class="who-mark" src="images/sp.png" alt="SP logo">
-      <h1>Things I've <em>built</em></h1>
+      <a class="who-logo-link" href="https://senthilcaesar.github.io" target="_blank" rel="noopener noreferrer" aria-label="Open Senthil's main portfolio (senthilcaesar.github.io) in a new tab" title="Visit senthilcaesar.github.io ↗">
+        <img class="who-mark" src="images/sp.png" alt="SP logo">
+      </a>
+      <a class="who-title-link" id="whoHomeLink" href="./" aria-label="Things I've built - Go to first project" title="Go to projects home">
+        <h1>Things I've <em>built</em></h1>
+      </a>
     </div>
     <label class="search" id="searchBox">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
@@ -417,7 +1197,14 @@
       <div class="dots" id="dots"></div>
     </nav>
     <nav class="top-links">
-      <button class="icon-btn" id="themeBtn" aria-label="Toggle light and dark theme">
+      <button class="icon-btn" id="bgToggleBtn" aria-label="Switch between foreground projects and background artwork" title="Toggle background view (B)">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/>
+          <path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/>
+          <path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/>
+        </svg>
+      </button>
+      <button class="icon-btn" id="themeBtn" aria-label="Toggle light and dark theme" title="Toggle theme">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
       </button>
     </nav>
@@ -437,6 +1224,12 @@
     </button>
   </div>
 </main>
+
+<button type="button" class="bg-return-pill" id="bgReturnPill" aria-label="Return to projects">
+  <span class="bg-pill-dot"></span>
+  <span>Viewing Abstract Background</span>
+  <span class="bg-pill-back">← Back to Projects (Esc)</span>
+</button>
 
 <footer>
   <div class="wrap">
@@ -530,6 +1323,53 @@ const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;"
   });
 })();
 
+/* ---------- Foreground / Background View Switch ---------- */
+(function initBackgroundToggle() {
+  const bgToggleBtn = $("#bgToggleBtn");
+  const bgReturnPill = $("#bgReturnPill");
+  const abstractBg = $("#abstractBg");
+
+  function setBackgroundView(active) {
+    const isBg = document.body.classList.toggle("view-background", active);
+    if (bgToggleBtn) {
+      bgToggleBtn.classList.toggle("is-active", isBg);
+      bgToggleBtn.setAttribute("aria-pressed", String(isBg));
+      bgToggleBtn.setAttribute("title", isBg ? "Return to projects (Esc)" : "View background artwork (B)");
+    }
+  }
+
+  if (bgToggleBtn) {
+    bgToggleBtn.addEventListener("click", () => {
+      const willBeBg = !document.body.classList.contains("view-background");
+      setBackgroundView(willBeBg);
+    });
+  }
+
+  if (bgReturnPill) {
+    bgReturnPill.addEventListener("click", () => setBackgroundView(false));
+  }
+
+  if (abstractBg) {
+    abstractBg.addEventListener("click", () => {
+      if (document.body.classList.contains("view-background")) {
+        setBackgroundView(false);
+      }
+    });
+  }
+
+  document.addEventListener("keydown", (e) => {
+    const inInput = e.target && (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA");
+    if (e.key === "Escape" && document.body.classList.contains("view-background")) {
+      setBackgroundView(false);
+    } else if ((e.key === "b" || e.key === "B") && !inInput && !e.metaKey && !e.ctrlKey && !e.altKey) {
+      const willBeBg = !document.body.classList.contains("view-background");
+      setBackgroundView(willBeBg);
+    }
+  });
+
+  window.setBackgroundView = setBackgroundView;
+})();
+
 /* ---------- Fallback picture shown until the live preview loads ---------- */
 function seeded(str) {
   let h = 2166136261;
@@ -619,7 +1459,7 @@ function render() {
   $("#count").textContent = query ? `${list.length} of ${plural(PROJECTS.length)}` : plural(PROJECTS.length);
 
   deck.innerHTML = list.length
-    ? list.map(p => projectHTML(p, PROJECTS.indexOf(p))).join("")
+    ? list.map((p, i) => projectHTML(p, i)).join("")
     : `<div class="no-results"><b>No projects match "${esc(query)}"</b>Try a project name or a skill such as Neo4j, React or LLMs.</div>`;
 
   pages = [...deck.querySelectorAll(".project")];
@@ -636,12 +1476,12 @@ function render() {
 function updatePager() {
   const pad = n => String(n).padStart(2, "0");
   $("#pager").hidden = pages.length === 0;
-  $("#pageNo").innerHTML = `<b>${pad(current + 1)}</b> / ${pad(pages.length)}`;
+  $("#pageNo").innerHTML = `<b>${pad(current + 1)}</b> / ${pad(PROJECTS.length)}`;
   $("#prevBtn").disabled = $("#edgePrev").disabled = current === 0;
   $("#nextBtn").disabled = $("#edgeNext").disabled = current >= pages.length - 1;
   $("#dots").querySelectorAll(".dot").forEach((d, i) => d.classList.toggle("on", i === current));
 
-  const name = i => pages[i] ? pages[i].getAttribute("aria-label") : "";
+  const name = i => (pages[i] ? pages[i].getAttribute("aria-label") : "");
   $("#peekPrev").textContent = `← ${name(current - 1)}`;
   $("#peekNext").textContent = `Next: ${name(current + 1)} →`;
   deck.classList.toggle("has-more", current < pages.length - 1);
@@ -657,7 +1497,7 @@ function updatePager() {
    3D sorting. The page beneath rises out of shadow as it's uncovered; going
    back plays the same turn in reverse. */
 const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-const TURN_MS = 1100;
+const TURN_MS = 550;
 const PANELS = 8;
 const DEG = Math.PI / 180;
 const ease = t => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
@@ -778,7 +1618,7 @@ setTimeout(() => {
   if (flipped || turning || reduceMotion.matches || current >= pages.length - 1) return;
   const page = pages[current], nextPage = pages[current + 1];
   turning = true;
-  turnPage(page, nextPage, t => 0.09 * Math.sin(Math.PI * t), 1300, () => {
+  turnPage(page, nextPage, t => 0.09 * Math.sin(Math.PI * t), 750, () => {
     nextPage.classList.remove("is-under");
     page.classList.add("is-current");
     turning = false;
@@ -842,6 +1682,21 @@ document.addEventListener("keydown", e => {
   if (e.key === "End") goTo(pages.length - 1);
 });
 
+/* ---------- "Things I've built" Projects Home Navigation ---------- */
+const whoLink = $("#whoHomeLink");
+if (whoLink) {
+  whoLink.addEventListener("click", e => {
+    e.preventDefault();
+    if (typeof window.setBackgroundView === "function") window.setBackgroundView(false);
+    else document.body.classList.remove("view-background");
+    if (query || (searchInput && searchInput.value)) {
+      if (searchInput) searchInput.value = "";
+      setQuery("");
+    }
+    goTo(0);
+  });
+}
+
 /* Types the sample question, pauses, erases, repeats */
 function typeLoop(el) {
   const text = el.dataset.text;
@@ -858,57 +1713,56 @@ function typeLoop(el) {
   step();
 }
 
-/* ---------- Subtle moving graph in the background ---------- */
-(function backgroundGraph() {
-  const canvas = $("#graph");
-  const ctx = canvas.getContext("2d");
+/* ---------- Master Parallax Controller for All Abstract Background Clusters ---------- */
+(function setupAbstractBackground() {
+  const bg = $("#abstractBg");
+  if (!bg) return;
   const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  let W, H, dpr, nodes = [];
-  const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  if (reduce) return;
 
-  function resize() {
-    dpr = Math.min(window.devicePixelRatio || 1, 2);
-    W = canvas.width = innerWidth * dpr;
-    H = canvas.height = innerHeight * dpr;
-    const count = Math.round(Math.min(70, (innerWidth * innerHeight) / 20000));
-    nodes = Array.from({ length: count }, () => ({
-      x: Math.random() * W, y: Math.random() * H,
-      vx: (Math.random() - 0.5) * 0.2 * dpr, vy: (Math.random() - 0.5) * 0.2 * dpr,
-      r: (Math.random() * 1.4 + 0.7) * dpr, k: Math.floor(Math.random() * 3)
-    }));
-  }
-  addEventListener("resize", resize);
-  resize();
+  let targetX = 0, targetY = 0;
+  let currentX = 0, currentY = 0;
+  let ticking = false;
 
-  function frame() {
-    const palette = [css("--accent"), css("--accent-2"), css("--accent-3")];
-    const link = 130 * dpr;
-    ctx.clearRect(0, 0, W, H);
-    ctx.strokeStyle = css("--text");
-    ctx.lineWidth = 0.8 * dpr;
-    for (const n of nodes) {
-      n.x += n.vx; n.y += n.vy;
-      if (n.x < 0 || n.x > W) n.vx *= -1;
-      if (n.y < 0 || n.y > H) n.vy *= -1;
+  window.addEventListener("pointermove", (e) => {
+    targetX = (e.clientX / window.innerWidth - 0.5) * 2;
+    targetY = (e.clientY / window.innerHeight - 0.5) * 2;
+    if (!ticking) {
+      ticking = true;
+      requestAnimationFrame(updateParallax);
     }
-    for (let i = 0; i < nodes.length; i++) {
-      for (let j = i + 1; j < nodes.length; j++) {
-        const a = nodes[i], b = nodes[j], d = Math.hypot(a.x - b.x, a.y - b.y);
-        if (d < link) {
-          ctx.globalAlpha = (1 - d / link) * 0.1;
-          ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
-        }
+  }, { passive: true });
+
+  const clusters = [
+    { id: "#cluster-knot", x: 1520, y: 440, fx: -16, fy: -14 },
+    { id: "#cluster-serpentine", x: 220, y: 890, fx: 18, fy: 16 },
+    { id: "#cluster-nautilus", x: 1080, y: 530, fx: -10, fy: 8 },
+    { id: "#cluster-sigiriya", x: 280, y: 520, fx: 14, fy: -12 },
+    { id: "#cluster-angkor", x: 360, y: 200, fx: 10, fy: -14 },
+    { id: "#cluster-gothic", x: 960, y: 150, fx: -8, fy: -10 },
+    { id: "#cluster-radial", x: 1440, y: 140, fx: -14, fy: -8 },
+    { id: "#cluster-mycelium", x: 1620, y: 800, fx: -18, fy: 14 },
+    { id: "#cluster-babylon", x: 1260, y: 920, fx: 12, fy: 18 },
+    { id: "#cluster-matrix", x: 680, y: 930, fx: -10, fy: 14 }
+  ];
+
+  function updateParallax() {
+    currentX += (targetX - currentX) * 0.05;
+    currentY += (targetY - currentY) * 0.05;
+
+    for (const c of clusters) {
+      const el = $(c.id);
+      if (el) {
+        el.setAttribute("transform", `translate(${c.x + currentX * c.fx}, ${c.y + currentY * c.fy})`);
       }
     }
-    for (const n of nodes) {
-      ctx.globalAlpha = 0.45;
-      ctx.fillStyle = palette[n.k];
-      ctx.beginPath(); ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2); ctx.fill();
+
+    if (Math.abs(targetX - currentX) > 0.001 || Math.abs(targetY - currentY) > 0.001) {
+      requestAnimationFrame(updateParallax);
+    } else {
+      ticking = false;
     }
-    ctx.globalAlpha = 1;
-    if (!reduce) requestAnimationFrame(frame);
   }
-  frame();
 })();
 
 $("#year").textContent = new Date().getFullYear();
